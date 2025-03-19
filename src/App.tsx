@@ -9,6 +9,7 @@ import Dashboard from "./pages/Index";
 import Membros from "./pages/Membros";
 import Eventos from "./pages/Eventos";
 import Agendas from "./pages/Agendas";
+import AutoIndicacao from "./pages/AutoIndicacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/membros" element={<Membros />} />
             <Route path="/eventos" element={<Eventos />} />
             <Route path="/agendas" element={<Agendas />} />
+            <Route path="/auto-indicacao" element={<AutoIndicacao />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

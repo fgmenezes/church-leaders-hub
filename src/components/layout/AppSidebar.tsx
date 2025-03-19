@@ -10,7 +10,8 @@ import {
   Settings, 
   BarChart3, 
   ChevronRight, 
-  Menu 
+  Menu,
+  UserPlus 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -54,6 +55,7 @@ export function AppSidebar() {
     { icon: Users, label: 'Membros', path: '/membros' },
     { icon: Calendar, label: 'Eventos', path: '/eventos' },
     { icon: ListTodo, label: 'Agendas', path: '/agendas' },
+    { icon: UserPlus, label: 'Auto Indicação', path: '/auto-indicacao' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: Settings, label: 'Configurações', path: '/configuracoes' },
   ];
