@@ -11,6 +11,9 @@ import Eventos from "./pages/Eventos";
 import Agendas from "./pages/Agendas";
 import AutoIndicacao from "./pages/AutoIndicacao";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,16 +23,25 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/membros" element={<Membros />} />
-            <Route path="/eventos" element={<Eventos />} />
-            <Route path="/agendas" element={<Agendas />} />
-            <Route path="/auto-indicacao" element={<AutoIndicacao />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Rotas públicas */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* Rotas protegidas */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/membros" element={<Membros />} />
+                <Route path="/eventos" element={<Eventos />} />
+                <Route path="/agendas" element={<Agendas />} />
+                <Route path="/auto-indicacao" element={<AutoIndicacao />} />
+              </Route>
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

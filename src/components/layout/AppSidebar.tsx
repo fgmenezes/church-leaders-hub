@@ -11,11 +11,13 @@ import {
   BarChart3, 
   ChevronRight, 
   Menu,
-  UserPlus 
+  UserPlus,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 type NavItemProps = {
   icon: React.ElementType;
@@ -49,6 +51,7 @@ export function AppSidebar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const routes = [
     { icon: Home, label: 'Dashboard', path: '/' },
@@ -117,14 +120,23 @@ export function AppSidebar() {
           isCollapsed && "justify-center"
         )}>
           <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground">
-            L
+            {user?.name.charAt(0) || 'L'}
           </div>
           {!isCollapsed && (
-            <div className="animate-fade-in">
-              <p className="text-sidebar-foreground text-sm font-medium">Líder</p>
+            <div className="animate-fade-in flex-1">
+              <p className="text-sidebar-foreground text-sm font-medium">{user?.name || 'Líder'}</p>
               <p className="text-sidebar-foreground/70 text-xs">Ministério</p>
             </div>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={logout}
+            className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+            title="Sair"
+          >
+            <LogOut size={18} />
+          </Button>
         </div>
       </div>
     </div>
