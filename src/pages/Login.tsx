@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -80,6 +80,11 @@ export default function Login() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Este sistema é reservado para líderes de ministérios
+          </p>
+        </CardFooter>
+        <CardFooter className="flex justify-center">
+          <p className="text-xs text-muted-foreground">
+            Use: admin@igreja.com / ministerio123
           </p>
         </CardFooter>
       </Card>
