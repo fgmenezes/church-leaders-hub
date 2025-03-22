@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import Dashboard from "./pages/Index";
 import Membros from "./pages/Membros";
+import MembroPerfil from "./pages/MembroPerfil";
 import Eventos from "./pages/Eventos";
 import Agendas from "./pages/Agendas";
 import AutoIndicacao from "./pages/AutoIndicacao";
@@ -33,6 +34,7 @@ const App = () => (
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/membros" element={<Membros />} />
+                <Route path="/membros/:id" element={<MembroPerfil />} />
                 <Route path="/eventos" element={<Eventos />} />
                 <Route path="/agendas" element={<Agendas />} />
                 <Route path="/auto-indicacao" element={<AutoIndicacao />} />

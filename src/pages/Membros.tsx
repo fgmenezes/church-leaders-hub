@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Membros = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Dados de exemplo para demonstração
   const membros = [
@@ -35,6 +37,11 @@ const Membros = () => {
   ];
   
   const handleAction = (action: string, id: string) => {
+    if (action === 'detalhes') {
+      navigate(`/membros/${id}`);
+      return;
+    }
+    
     toast({
       title: "Ação solicitada",
       description: `Ação "${action}" para o membro ID: ${id} será implementada em breve.`,
@@ -46,6 +53,10 @@ const Membros = () => {
       title: "Adicionar membro",
       description: "Funcionalidade será implementada em breve.",
     });
+  };
+
+  const navigateToMemberProfile = (id: string) => {
+    navigate(`/membros/${id}`);
   };
   
   return (
@@ -86,7 +97,12 @@ const Membros = () => {
               <TableBody>
                 {membros.map((membro) => (
                   <TableRow key={membro.id}>
-                    <TableCell className="font-medium">{membro.nome}</TableCell>
+                    <TableCell 
+                      className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors" 
+                      onClick={() => navigateToMemberProfile(membro.id)}
+                    >
+                      {membro.nome}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={membro.status === 'ativo' ? 'default' : 'outline'}>
                         {membro.status === 'ativo' ? 'Ativo' : 'Inativo'}
