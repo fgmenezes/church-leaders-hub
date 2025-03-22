@@ -55,11 +55,15 @@ const Membros = () => {
   
   // Função para editar membro
   const handleEdit = (id: string) => {
+    // Criando uma página temporária de edição
+    // Antes tínhamos apenas uma notificação, agora vamos redirecionar para o perfil do membro
+    // enquanto a página de edição não está pronta
+    navigate(`/membros/${id}`);
+    
     toast({
       title: "Editando membro",
-      description: `Redirecionando para edição do membro ID: ${id}`,
+      description: `Redirecionando para a página de edição (temporariamente usando perfil)`,
     });
-    navigate(`/membros/${id}/editar`);
   };
   
   // Função para ver detalhes do membro
@@ -210,7 +214,7 @@ const Membros = () => {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" className="hover:bg-accent focus:bg-accent">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
