@@ -8,6 +8,7 @@ type PageHeaderProps = {
   description?: string;
   children?: React.ReactNode;
   badge?: string;
+  subtitle?: React.ReactNode;
   className?: string;
 };
 
@@ -16,6 +17,7 @@ export function PageHeader({
   description, 
   children, 
   badge,
+  subtitle,
   className 
 }: PageHeaderProps) {
   return (
@@ -32,6 +34,7 @@ export function PageHeader({
               {badge}
             </Badge>
           )}
+          {subtitle}
         </div>
         {description && (
           <p className="text-muted-foreground mt-1">{description}</p>
