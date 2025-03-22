@@ -79,9 +79,6 @@ const Membros = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Função</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
@@ -90,9 +87,6 @@ const Membros = () => {
                 {membros.map((membro) => (
                   <TableRow key={membro.id}>
                     <TableCell className="font-medium">{membro.nome}</TableCell>
-                    <TableCell>{membro.email}</TableCell>
-                    <TableCell>{membro.telefone}</TableCell>
-                    <TableCell>{membro.funcao}</TableCell>
                     <TableCell>
                       <Badge variant={membro.status === 'ativo' ? 'default' : 'outline'}>
                         {membro.status === 'ativo' ? 'Ativo' : 'Inativo'}
