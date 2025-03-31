@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { MembersProvider } from "./contexts/MembersContext";
 
 const queryClient = new QueryClient();
 
@@ -25,26 +26,28 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* Rotas públicas */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Rotas protegidas */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/membros" element={<Membros />} />
-                <Route path="/membros/:id" element={<MembroPerfil />} />
-                <Route path="/membros/editar/:id" element={<MembroPerfil />} />
-                <Route path="/membros/novo" element={<MembroPerfil />} />
-                <Route path="/eventos" element={<Eventos />} />
-                <Route path="/agendas" element={<Agendas />} />
-                <Route path="/auto-indicacao" element={<AutoIndicacao />} />
+          <MembersProvider>
+            <Routes>
+              {/* Rotas públicas */}
+              <Route path="/login" element={<Login />} />
+              
+              {/* Rotas protegidas */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/membros" element={<Membros />} />
+                  <Route path="/membros/:id" element={<MembroPerfil />} />
+                  <Route path="/membros/editar/:id" element={<MembroPerfil />} />
+                  <Route path="/membros/novo" element={<MembroPerfil />} />
+                  <Route path="/eventos" element={<Eventos />} />
+                  <Route path="/agendas" element={<Agendas />} />
+                  <Route path="/auto-indicacao" element={<AutoIndicacao />} />
+                </Route>
               </Route>
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </MembersProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

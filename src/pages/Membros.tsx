@@ -31,10 +31,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useMembers } from '@/contexts/MembersContext';
 
 const Membros = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Use members context
+  const { members, deleteMember, toggleMemberStatus } = useMembers();
   
   // Estado para controlar diálogos de confirmação
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -44,18 +48,8 @@ const Membros = () => {
     membroNome: string;
   }>({ isOpen: false, type: 'delete', memberId: '', membroNome: '' });
   
-  // Dados de exemplo para demonstração
-  const [membros, setMembros] = useState([
-    { id: '1', nome: 'Ana Silva', email: 'ana.silva@email.com', telefone: '(11) 98765-4321', funcao: 'Vocal', status: 'ativo' },
-    { id: '2', nome: 'Bruno Santos', email: 'bruno.santos@email.com', telefone: '(11) 91234-5678', funcao: 'Tecladista', status: 'ativo' },
-    { id: '3', nome: 'Carla Oliveira', email: 'carla.oliveira@email.com', telefone: '(11) 99876-5432', funcao: 'Baixista', status: 'ativo' },
-    { id: '4', nome: 'Daniel Pereira', email: 'daniel.pereira@email.com', telefone: '(11) 95678-1234', funcao: 'Guitarrista', status: 'inativo' },
-    { id: '5', nome: 'Eduardo Costa', email: 'eduardo.costa@email.com', telefone: '(11) 92345-6789', funcao: 'Baterista', status: 'ativo' },
-  ]);
-  
-  // Função para editar membro (redireciona para uma página de edição temporária)
+  // Função para editar membro
   const handleEdit = (id: string) => {
-    // TODO: Criar uma página de edição real em vez de usar a página de perfil
     navigate(`/membros/editar/${id}`);
     
     toast({
@@ -81,7 +75,7 @@ const Membros = () => {
   
   // Função para excluir membro
   const handleDelete = (id: string) => {
-    setMembros(prev => prev.filter(membro => membro.id !== id));
+    deleteMember(id);
     
     toast({
       title: "Membro excluído",
@@ -94,22 +88,12 @@ const Membros = () => {
   };
   
   // Função para alterar o status do membro
-  const handleToggleStatus = (id: string, currentStatus: string) => {
-    setMembros(prev => prev.map(membro => {
-      if (membro.id === id) {
-        return {
-          ...membro,
-          status: currentStatus === 'ativo' ? 'inativo' : 'ativo'
-        };
-      }
-      return membro;
-    }));
-    
-    const newStatus = currentStatus === 'ativo' ? 'Inativo' : 'Ativo';
+  const handleToggleStatus = (id: string) => {
+    toggleMemberStatus(id);
     
     toast({
-      title: `Status alterado para ${newStatus}`,
-      description: `O membro agora está ${newStatus.toLowerCase()}.`,
+      title: "Status alterado",
+      description: "O status do membro foi alterado com sucesso.",
       variant: "default"
     });
     
@@ -144,7 +128,7 @@ const Membros = () => {
       return {
         title: "Desativar membro",
         description: `Tem certeza que deseja desativar ${membroNome}?`,
-        confirmAction: () => handleToggleStatus(memberId, 'ativo'),
+        confirmAction: () => handleToggleStatus(memberId),
         confirmText: "Desativar",
         confirmVariant: "default" as const
       };
@@ -152,7 +136,7 @@ const Membros = () => {
       return {
         title: "Ativar membro",
         description: `Tem certeza que deseja ativar ${membroNome}?`,
-        confirmAction: () => handleToggleStatus(memberId, 'inativo'),
+        confirmAction: () => handleToggleStatus(memberId),
         confirmText: "Ativar",
         confirmVariant: "default" as const
       };
@@ -166,7 +150,7 @@ const Membros = () => {
       <PageHeader 
         title="Membros" 
         description="Gerencie os membros do seu ministério"
-        badge={`${membros.length} membros`}
+        badge={`${members.length} membros`}
       >
         <Button onClick={handleAddMembro}>
           <UserPlus className="mr-2 h-4 w-4" />
@@ -197,7 +181,7 @@ const Membros = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {membros.map((membro) => (
+                {members.map((membro) => (
                   <TableRow key={membro.id}>
                     <TableCell 
                       className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors" 

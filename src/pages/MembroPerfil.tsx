@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -7,116 +6,34 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronLeft, Mail, Phone, UserRound, Music, CalendarClock, Save, X } from 'lucide-react';
+import { ChevronLeft, Mail, Phone, UserRound, Music, CalendarClock, Save, X, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-
-interface Membro {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  funcao: string;
-  status: string;
-  dataNascimento?: string;
-  dataIngresso?: string;
-  endereco?: string;
-  habilidades?: string[];
-  observacoes?: string;
-}
+import { useMembers, Membro } from '@/contexts/MembersContext';
 
 const MembroPerfil = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
   const [membro, setMembro] = useState<Membro | null>(null);
   const [editedMembro, setEditedMembro] = useState<Membro | null>(null);
-  const [loading, setLoading] = useState(true);
   
-  // Determinar se estamos no modo de edição ou novo membro
+  const { getMember, updateMember, addMember } = useMembers();
+  
   const isEditMode = location.pathname.includes('/editar/');
   const isNewMode = location.pathname.includes('/novo');
 
   useEffect(() => {
-    // Simulando busca de dados do membro
     const buscarMembro = () => {
       setLoading(true);
       
-      // Dados de exemplo - em produção, estes dados viriam de uma API
-      const membrosData: Membro[] = [
-        { 
-          id: '1', 
-          nome: 'Ana Silva', 
-          email: 'ana.silva@email.com', 
-          telefone: '(11) 98765-4321', 
-          funcao: 'Vocal', 
-          status: 'ativo',
-          dataNascimento: '15/05/1992',
-          dataIngresso: '10/01/2020',
-          endereco: 'Rua das Flores, 123 - São Paulo/SP',
-          habilidades: ['Canto', 'Violão', 'Piano'],
-          observacoes: 'Participa do ministério aos domingos e quartas-feiras.'
-        },
-        { 
-          id: '2', 
-          nome: 'Bruno Santos', 
-          email: 'bruno.santos@email.com', 
-          telefone: '(11) 91234-5678', 
-          funcao: 'Tecladista', 
-          status: 'ativo',
-          dataNascimento: '22/07/1988',
-          dataIngresso: '05/03/2019',
-          endereco: 'Av. Paulista, 1000 - São Paulo/SP',
-          habilidades: ['Teclado', 'Arranjos'],
-          observacoes: 'Responsável pelos arranjos do ministério.'
-        },
-        { 
-          id: '3', 
-          nome: 'Carla Oliveira', 
-          email: 'carla.oliveira@email.com', 
-          telefone: '(11) 99876-5432', 
-          funcao: 'Baixista', 
-          status: 'ativo',
-          dataNascimento: '30/10/1995',
-          dataIngresso: '15/06/2021',
-          endereco: 'Rua Augusta, 500 - São Paulo/SP',
-          habilidades: ['Baixo', 'Contrabaixo'],
-          observacoes: 'Disponível aos finais de semana.'
-        },
-        { 
-          id: '4', 
-          nome: 'Daniel Pereira', 
-          email: 'daniel.pereira@email.com', 
-          telefone: '(11) 95678-1234', 
-          funcao: 'Guitarrista', 
-          status: 'inativo',
-          dataNascimento: '12/12/1990',
-          dataIngresso: '20/07/2018',
-          endereco: 'Rua Consolação, 750 - São Paulo/SP',
-          habilidades: ['Guitarra', 'Violão'],
-          observacoes: 'Afastado temporariamente por motivos de saúde.'
-        },
-        { 
-          id: '5', 
-          nome: 'Eduardo Costa', 
-          email: 'eduardo.costa@email.com', 
-          telefone: '(11) 92345-6789', 
-          funcao: 'Baterista', 
-          status: 'ativo',
-          dataNascimento: '05/03/1993',
-          dataIngresso: '17/09/2020',
-          endereco: 'Alameda Santos, 400 - São Paulo/SP',
-          habilidades: ['Bateria', 'Percussão'],
-          observacoes: 'Também atua como técnico de som.'
-        },
-      ];
-      
       if (isNewMode) {
         const novoMembro: Membro = {
-          id: String(membrosData.length + 1),
+          id: `new-${Date.now()}`,
           nome: '',
           email: '',
           telefone: '',
@@ -126,33 +43,39 @@ const MembroPerfil = () => {
         setMembro(novoMembro);
         setEditedMembro(novoMembro);
         setLoading(false);
-      } else {
-        // Buscar membro nos dados de exemplo
-        const membroEncontrado = membrosData.find(m => m.id === id);
+      } else if (id) {
+        const membroEncontrado = getMember(id);
         
         setTimeout(() => {
-          setMembro(membroEncontrado || null);
+          setMembro(membroEncontrado);
           setEditedMembro(membroEncontrado ? {...membroEncontrado} : null);
           setLoading(false);
-        }, 500); // Simula um delay de rede
+        }, 300);
       }
     };
     
     buscarMembro();
-  }, [id, isNewMode]);
+  }, [id, isNewMode, getMember]);
 
   const handleSave = () => {
     if (!editedMembro) return;
     
-    // Aqui seria implementada a lógica para salvar no banco de dados
-    // Por enquanto, vamos apenas fingir que salvamos
+    if (isNewMode) {
+      addMember(editedMembro);
+      
+      toast({
+        title: "Membro cadastrado",
+        description: "Novo membro cadastrado com sucesso!",
+      });
+    } else {
+      updateMember(editedMembro);
+      
+      toast({
+        title: "Alterações salvas",
+        description: "As alterações foram salvas com sucesso!",
+      });
+    }
     
-    toast({
-      title: isNewMode ? "Membro cadastrado" : "Alterações salvas",
-      description: isNewMode ? "Novo membro cadastrado com sucesso!" : "As alterações foram salvas com sucesso!",
-    });
-    
-    // Redirecionar para a lista de membros após salvar
     navigate('/membros');
   };
   
@@ -202,7 +125,6 @@ const MembroPerfil = () => {
     );
   }
   
-  // Renderização para o modo de edição ou novo membro
   if (isEditMode || isNewMode) {
     if (!editedMembro) return null;
     
@@ -310,7 +232,6 @@ const MembroPerfil = () => {
     );
   }
 
-  // Renderização para o modo de visualização
   return (
     <div className="animate-fade-in">
       <PageHeader 
