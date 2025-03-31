@@ -53,16 +53,14 @@ const Membros = () => {
     { id: '5', nome: 'Eduardo Costa', email: 'eduardo.costa@email.com', telefone: '(11) 92345-6789', funcao: 'Baterista', status: 'ativo' },
   ]);
   
-  // Função para editar membro
+  // Função para editar membro (redireciona para uma página de edição temporária)
   const handleEdit = (id: string) => {
-    // Criando uma página temporária de edição
-    // Antes tínhamos apenas uma notificação, agora vamos redirecionar para o perfil do membro
-    // enquanto a página de edição não está pronta
-    navigate(`/membros/${id}`);
+    // TODO: Criar uma página de edição real em vez de usar a página de perfil
+    navigate(`/membros/editar/${id}`);
     
     toast({
       title: "Editando membro",
-      description: `Redirecionando para a página de edição (temporariamente usando perfil)`,
+      description: `Redirecionando para a página de edição do membro`,
     });
   };
   
@@ -120,9 +118,10 @@ const Membros = () => {
   };
   
   const handleAddMembro = () => {
+    navigate('/membros/novo');
     toast({
       title: "Adicionar membro",
-      description: "Funcionalidade será implementada em breve.",
+      description: "Redirecionando para página de cadastro de novo membro.",
     });
   };
 
@@ -214,7 +213,11 @@ const Membros = () => {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="hover:bg-accent focus:bg-accent">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover:bg-accent focus:bg-accent"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

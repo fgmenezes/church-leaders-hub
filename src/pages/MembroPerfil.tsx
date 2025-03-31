@@ -1,13 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, Mail, Phone, UserRound, Music, CalendarClock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronLeft, Mail, Phone, UserRound, Music, CalendarClock, Save, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 interface Membro {
   id: string;
@@ -26,8 +30,15 @@ interface Membro {
 const MembroPerfil = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
   const [membro, setMembro] = useState<Membro | null>(null);
+  const [editedMembro, setEditedMembro] = useState<Membro | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Determinar se estamos no modo de edição ou novo membro
+  const isEditMode = location.pathname.includes('/editar/');
+  const isNewMode = location.pathname.includes('/novo');
 
   useEffect(() => {
     // Simulando busca de dados do membro
@@ -103,16 +114,63 @@ const MembroPerfil = () => {
         },
       ];
       
-      const membroEncontrado = membrosData.find(m => m.id === id);
-      
-      setTimeout(() => {
-        setMembro(membroEncontrado || null);
+      if (isNewMode) {
+        const novoMembro: Membro = {
+          id: String(membrosData.length + 1),
+          nome: '',
+          email: '',
+          telefone: '',
+          funcao: '',
+          status: 'ativo'
+        };
+        setMembro(novoMembro);
+        setEditedMembro(novoMembro);
         setLoading(false);
-      }, 500); // Simula um delay de rede
+      } else {
+        // Buscar membro nos dados de exemplo
+        const membroEncontrado = membrosData.find(m => m.id === id);
+        
+        setTimeout(() => {
+          setMembro(membroEncontrado || null);
+          setEditedMembro(membroEncontrado ? {...membroEncontrado} : null);
+          setLoading(false);
+        }, 500); // Simula um delay de rede
+      }
     };
     
     buscarMembro();
-  }, [id]);
+  }, [id, isNewMode]);
+
+  const handleSave = () => {
+    if (!editedMembro) return;
+    
+    // Aqui seria implementada a lógica para salvar no banco de dados
+    // Por enquanto, vamos apenas fingir que salvamos
+    
+    toast({
+      title: isNewMode ? "Membro cadastrado" : "Alterações salvas",
+      description: isNewMode ? "Novo membro cadastrado com sucesso!" : "As alterações foram salvas com sucesso!",
+    });
+    
+    // Redirecionar para a lista de membros após salvar
+    navigate('/membros');
+  };
+  
+  const handleCancel = () => {
+    navigate('/membros');
+  };
+  
+  const handleFieldChange = (field: keyof Membro, value: string) => {
+    if (!editedMembro) return;
+    
+    setEditedMembro(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
+  };
 
   if (loading) {
     return (
@@ -127,7 +185,7 @@ const MembroPerfil = () => {
     );
   }
 
-  if (!membro) {
+  if (!membro && !isNewMode) {
     return (
       <div className="animate-fade-in">
         <PageHeader title="Membro não encontrado" description="O membro solicitado não existe" />
@@ -143,22 +201,137 @@ const MembroPerfil = () => {
       </div>
     );
   }
+  
+  // Renderização para o modo de edição ou novo membro
+  if (isEditMode || isNewMode) {
+    if (!editedMembro) return null;
+    
+    return (
+      <div className="animate-fade-in">
+        <PageHeader 
+          title={isNewMode ? "Novo Membro" : `Editar: ${membro?.nome}`}
+          description={isNewMode ? "Cadastre um novo membro no ministério" : "Edite os dados do membro"}
+        >
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleCancel}>
+              <X className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" />
+              Salvar
+            </Button>
+          </div>
+        </PageHeader>
 
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Informações Pessoais</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome</Label>
+                <Input 
+                  id="nome" 
+                  value={editedMembro.nome} 
+                  onChange={(e) => handleFieldChange('nome', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={editedMembro.email} 
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="telefone">Telefone</Label>
+                <Input 
+                  id="telefone" 
+                  value={editedMembro.telefone} 
+                  onChange={(e) => handleFieldChange('telefone', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="funcao">Função</Label>
+                <Input 
+                  id="funcao" 
+                  value={editedMembro.funcao} 
+                  onChange={(e) => handleFieldChange('funcao', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+                <Input 
+                  id="dataNascimento" 
+                  value={editedMembro.dataNascimento || ''} 
+                  onChange={(e) => handleFieldChange('dataNascimento', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dataIngresso">Data de Ingresso</Label>
+                <Input 
+                  id="dataIngresso" 
+                  value={editedMembro.dataIngresso || ''} 
+                  onChange={(e) => handleFieldChange('dataIngresso', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="endereco">Endereço</Label>
+                <Input 
+                  id="endereco" 
+                  value={editedMembro.endereco || ''} 
+                  onChange={(e) => handleFieldChange('endereco', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="observacoes">Observações</Label>
+                <Textarea 
+                  id="observacoes" 
+                  value={editedMembro.observacoes || ''} 
+                  onChange={(e) => handleFieldChange('observacoes', e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Renderização para o modo de visualização
   return (
     <div className="animate-fade-in">
       <PageHeader 
-        title={membro.nome} 
-        description={`Perfil do membro - ${membro.funcao}`}
+        title={membro?.nome} 
+        description={`Perfil do membro - ${membro?.funcao}`}
         subtitle={
-          <Badge variant={membro.status === 'ativo' ? 'default' : 'outline'} className="ml-2">
-            {membro.status === 'ativo' ? 'Ativo' : 'Inativo'}
+          <Badge variant={membro?.status === 'ativo' ? 'default' : 'outline'} className="ml-2">
+            {membro?.status === 'ativo' ? 'Ativo' : 'Inativo'}
           </Badge>
         }
       >
-        <Button variant="outline" onClick={() => navigate('/membros')}>
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/membros')}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
+          <Button onClick={() => navigate(`/membros/editar/${id}`)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
+        </div>
       </PageHeader>
 
       <div className="grid gap-6 md:grid-cols-7">
@@ -169,19 +342,19 @@ const MembroPerfil = () => {
                 <UserRound className="h-16 w-16 text-primary" />
               </div>
               
-              <h3 className="text-xl font-medium mt-2">{membro.nome}</h3>
-              <p className="text-muted-foreground">{membro.funcao}</p>
+              <h3 className="text-xl font-medium mt-2">{membro?.nome}</h3>
+              <p className="text-muted-foreground">{membro?.funcao}</p>
               
               <Separator className="my-4" />
               
               <div className="w-full space-y-3">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{membro.email}</span>
+                  <span className="text-sm">{membro?.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{membro.telefone}</span>
+                  <span className="text-sm">{membro?.telefone}</span>
                 </div>
               </div>
             </CardContent>
@@ -204,15 +377,15 @@ const MembroPerfil = () => {
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">Endereço</dt>
-                      <dd className="text-sm mt-1">{membro.endereco || 'Não informado'}</dd>
+                      <dd className="text-sm mt-1">{membro?.endereco || 'Não informado'}</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">Data de Nascimento</dt>
-                      <dd className="text-sm mt-1">{membro.dataNascimento || 'Não informado'}</dd>
+                      <dd className="text-sm mt-1">{membro?.dataNascimento || 'Não informado'}</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-muted-foreground">Data de Ingresso</dt>
-                      <dd className="text-sm mt-1">{membro.dataIngresso || 'Não informado'}</dd>
+                      <dd className="text-sm mt-1">{membro?.dataIngresso || 'Não informado'}</dd>
                     </div>
                   </dl>
                 </CardContent>
@@ -224,7 +397,7 @@ const MembroPerfil = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {membro.habilidades?.length ? (
+                    {membro?.habilidades?.length ? (
                       membro.habilidades.map((habilidade, index) => (
                         <Badge variant="secondary" key={index} className="flex items-center gap-1">
                           <Music className="h-3 w-3" />
@@ -243,7 +416,7 @@ const MembroPerfil = () => {
                   <CardTitle>Observações</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">{membro.observacoes || 'Nenhuma observação registrada'}</p>
+                  <p className="text-sm">{membro?.observacoes || 'Nenhuma observação registrada'}</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -260,7 +433,7 @@ const MembroPerfil = () => {
                       <div>
                         <p className="text-sm font-medium">Participação em Evento</p>
                         <p className="text-xs text-muted-foreground">Culto de Domingo - 15/10/2023</p>
-                        <p className="text-sm mt-1">Participou como {membro.funcao}</p>
+                        <p className="text-sm mt-1">Participou como {membro?.funcao}</p>
                       </div>
                     </div>
                     
@@ -269,7 +442,7 @@ const MembroPerfil = () => {
                       <div>
                         <p className="text-sm font-medium">Participação em Evento</p>
                         <p className="text-xs text-muted-foreground">Culto de Quarta - 11/10/2023</p>
-                        <p className="text-sm mt-1">Participou como {membro.funcao}</p>
+                        <p className="text-sm mt-1">Participou como {membro?.funcao}</p>
                       </div>
                     </div>
                     
@@ -278,7 +451,7 @@ const MembroPerfil = () => {
                       <div>
                         <p className="text-sm font-medium">Participação em Evento</p>
                         <p className="text-xs text-muted-foreground">Culto de Domingo - 08/10/2023</p>
-                        <p className="text-sm mt-1">Participou como {membro.funcao}</p>
+                        <p className="text-sm mt-1">Participou como {membro?.funcao}</p>
                       </div>
                     </div>
                   </div>
