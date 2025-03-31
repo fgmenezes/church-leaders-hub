@@ -176,6 +176,8 @@ const Membros = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead className="hidden md:table-cell">Telefone</TableHead>
+                  <TableHead className="hidden md:table-cell">Função</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
@@ -189,6 +191,8 @@ const Membros = () => {
                     >
                       {membro.nome}
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">{membro.telefone}</TableCell>
+                    <TableCell className="hidden md:table-cell">{membro.funcao}</TableCell>
                     <TableCell>
                       <Badge variant={membro.status === 'ativo' ? 'default' : 'outline'}>
                         {membro.status === 'ativo' ? 'Ativo' : 'Inativo'}

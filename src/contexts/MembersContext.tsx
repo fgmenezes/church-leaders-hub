@@ -12,7 +12,27 @@ export interface Membro {
   status: string;
   dataNascimento?: string;
   dataIngresso?: string;
-  endereco?: string;
+  // New fields for address details
+  endereco?: {
+    rua?: string;
+    numero?: string;
+    cep?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+  };
+  // New fields for baptism and responsible parties
+  batizado?: boolean;
+  responsaveis?: {
+    pai?: {
+      nome?: string;
+      telefone?: string;
+    };
+    mae?: {
+      nome?: string;
+      telefone?: string;
+    };
+  };
   habilidades?: string[];
   observacoes?: string;
 }
@@ -28,7 +48,15 @@ const initialMembers: Membro[] = [
     status: 'ativo',
     dataNascimento: '15/05/1992',
     dataIngresso: '10/01/2020',
-    endereco: 'Rua das Flores, 123 - São Paulo/SP',
+    endereco: {
+      rua: 'Rua das Flores',
+      numero: '123',
+      cep: '01234-567',
+      bairro: 'Centro',
+      cidade: 'São Paulo',
+      estado: 'SP'
+    },
+    batizado: true,
     habilidades: ['Canto', 'Violão', 'Piano'],
     observacoes: 'Participa do ministério aos domingos e quartas-feiras.'
   },
@@ -41,7 +69,15 @@ const initialMembers: Membro[] = [
     status: 'ativo',
     dataNascimento: '22/07/1988',
     dataIngresso: '05/03/2019',
-    endereco: 'Av. Paulista, 1000 - São Paulo/SP',
+    endereco: {
+      rua: 'Av. Paulista',
+      numero: '1000',
+      cep: '04567-890',
+      bairro: 'Bela Vista',
+      cidade: 'São Paulo',
+      estado: 'SP'
+    },
+    batizado: true,
     habilidades: ['Teclado', 'Arranjos'],
     observacoes: 'Responsável pelos arranjos do ministério.'
   },
@@ -54,7 +90,25 @@ const initialMembers: Membro[] = [
     status: 'ativo',
     dataNascimento: '30/10/1995',
     dataIngresso: '15/06/2021',
-    endereco: 'Rua Augusta, 500 - São Paulo/SP',
+    endereco: {
+      rua: 'Rua Augusta',
+      numero: '500',
+      cep: '01234-000',
+      bairro: 'Consolação',
+      cidade: 'São Paulo',
+      estado: 'SP'
+    },
+    batizado: false,
+    responsaveis: {
+      pai: {
+        nome: 'Roberto Oliveira',
+        telefone: '(11) 99876-1234'
+      },
+      mae: {
+        nome: 'Marta Oliveira',
+        telefone: '(11) 99876-5678'
+      }
+    },
     habilidades: ['Baixo', 'Contrabaixo'],
     observacoes: 'Disponível aos finais de semana.'
   },
@@ -67,7 +121,15 @@ const initialMembers: Membro[] = [
     status: 'inativo',
     dataNascimento: '12/12/1990',
     dataIngresso: '20/07/2018',
-    endereco: 'Rua Consolação, 750 - São Paulo/SP',
+    endereco: {
+      rua: 'Rua Consolação',
+      numero: '750',
+      cep: '04321-000',
+      bairro: 'Consolação',
+      cidade: 'São Paulo',
+      estado: 'SP'
+    },
+    batizado: true,
     habilidades: ['Guitarra', 'Violão'],
     observacoes: 'Afastado temporariamente por motivos de saúde.'
   },
@@ -80,7 +142,15 @@ const initialMembers: Membro[] = [
     status: 'ativo',
     dataNascimento: '05/03/1993',
     dataIngresso: '17/09/2020',
-    endereco: 'Alameda Santos, 400 - São Paulo/SP',
+    endereco: {
+      rua: 'Alameda Santos',
+      numero: '400',
+      cep: '05678-000',
+      bairro: 'Jardins',
+      cidade: 'São Paulo',
+      estado: 'SP'
+    },
+    batizado: true,
     habilidades: ['Bateria', 'Percussão'],
     observacoes: 'Também atua como técnico de som.'
   },
@@ -176,7 +246,13 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
   };
 
   const addMember = (newMember: Membro): void => {
-    setMembers(currentMembers => [...currentMembers, newMember]);
+    // Ensure new member has a valid ID
+    const memberWithId = {
+      ...newMember,
+      id: newMember.id.startsWith('new-') ? `${Date.now()}` : newMember.id
+    };
+    
+    setMembers(currentMembers => [...currentMembers, memberWithId]);
     
     // Show toast notification
     toast({
