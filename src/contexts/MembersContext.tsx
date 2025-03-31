@@ -23,6 +23,7 @@ export interface Membro {
   };
   // New fields for baptism and responsible parties
   batizado?: boolean;
+  localNascimento?: string; // Added birthplace field
   responsaveis?: {
     pai?: {
       nome?: string;
@@ -246,10 +247,11 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
   };
 
   const addMember = (newMember: Membro): void => {
-    // Ensure new member has a valid ID
+    // Ensure new member has a valid ID and status is set
     const memberWithId = {
       ...newMember,
-      id: newMember.id.startsWith('new-') ? `${Date.now()}` : newMember.id
+      id: newMember.id && newMember.id.startsWith('new-') ? `${Date.now()}` : (newMember.id || `${Date.now()}`),
+      status: newMember.status || 'ativo' // Ensure status is set, default to 'ativo'
     };
     
     setMembers(currentMembers => [...currentMembers, memberWithId]);

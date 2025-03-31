@@ -109,8 +109,11 @@ const Membros = () => {
     });
   };
 
+  // Fixed the navigation function to properly go to member profile
   const navigateToMemberProfile = (id: string) => {
-    navigate(`/membros/${id}`);
+    if (id) {
+      navigate(`/membros/${id}`);
+    }
   };
   
   const getDialogContent = () => {
