@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 // Define the Membro interface
 export interface Membro {
@@ -129,26 +130,59 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
         member.id === updatedMember.id ? updatedMember : member
       )
     );
+    
+    // Show toast notification
+    toast({
+      title: "Membro atualizado",
+      description: `${updatedMember.nome} foi atualizado com sucesso.`,
+    });
   };
 
   const deleteMember = (id: string): void => {
+    const memberToDelete = getMember(id);
     setMembers(currentMembers => 
       currentMembers.filter(member => member.id !== id)
     );
+    
+    // Show toast notification if the member was found
+    if (memberToDelete) {
+      toast({
+        title: "Membro removido",
+        description: `${memberToDelete.nome} foi removido com sucesso.`,
+      });
+    }
   };
 
   const toggleMemberStatus = (id: string): void => {
+    const memberToUpdate = getMember(id);
     setMembers(currentMembers => 
-      currentMembers.map(member => 
-        member.id === id 
-          ? { ...member, status: member.status === 'ativo' ? 'inativo' : 'ativo' } 
-          : member
-      )
+      currentMembers.map(member => {
+        if (member.id === id) {
+          const newStatus = member.status === 'ativo' ? 'inativo' : 'ativo';
+          return { ...member, status: newStatus };
+        }
+        return member;
+      })
     );
+    
+    // Show toast notification if the member was found
+    if (memberToUpdate) {
+      const newStatus = memberToUpdate.status === 'ativo' ? 'inativo' : 'ativo';
+      toast({
+        title: newStatus === 'ativo' ? "Membro ativado" : "Membro desativado",
+        description: `${memberToUpdate.nome} foi ${newStatus === 'ativo' ? 'ativado' : 'desativado'} com sucesso.`,
+      });
+    }
   };
 
   const addMember = (newMember: Membro): void => {
     setMembers(currentMembers => [...currentMembers, newMember]);
+    
+    // Show toast notification
+    toast({
+      title: "Membro adicionado",
+      description: `${newMember.nome} foi adicionado com sucesso.`,
+    });
   };
 
   return (
