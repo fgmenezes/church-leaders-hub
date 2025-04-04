@@ -1,6 +1,14 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+
+// Define the observation interface
+export interface Observacao {
+  id: string;
+  titulo: string;
+  texto: string;
+  data: string;
+  autor: string;
+}
 
 // Define the Membro interface
 export interface Membro {
@@ -36,6 +44,7 @@ export interface Membro {
   };
   habilidades?: string[];
   observacoes?: string;
+  listaObservacoes?: Observacao[];
 }
 
 // Initial dummy data
@@ -59,7 +68,16 @@ const initialMembers: Membro[] = [
     },
     batizado: true,
     habilidades: ['Canto', 'Violão', 'Piano'],
-    observacoes: 'Participa do ministério aos domingos e quartas-feiras.'
+    observacoes: 'Participa do ministério aos domingos e quartas-feiras.',
+    listaObservacoes: [
+      {
+        id: '1',
+        titulo: 'Participação no retiro',
+        texto: 'Ana participou do retiro de louvor e demonstrou excelente capacidade de liderança.',
+        data: '15/03/2023',
+        autor: 'Pastor João'
+      }
+    ]
   },
   { 
     id: '2', 
@@ -164,6 +182,7 @@ interface MembersContextType {
   deleteMember: (id: string) => void;
   toggleMemberStatus: (id: string) => void;
   addMember: (member: Membro) => void;
+  addObservacao: (memberId: string, observacao: Omit<Observacao, 'id'>) => void;
 }
 
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
@@ -251,7 +270,8 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
     const memberWithId = {
       ...newMember,
       id: newMember.id && newMember.id.startsWith('new-') ? `${Date.now()}` : (newMember.id || `${Date.now()}`),
-      status: newMember.status || 'ativo' // Ensure status is set, default to 'ativo'
+      status: newMember.status || 'ativo',
+      listaObservacoes: newMember.listaObservacoes || []
     };
     
     setMembers(currentMembers => [...currentMembers, memberWithId]);
@@ -263,6 +283,29 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
     });
   };
 
+  const addObservacao = (memberId: string, observacao: Omit<Observacao, 'id'>): void => {
+    const newObservacao: Observacao = {
+      ...observacao,
+      id: `obs-${Date.now()}`
+    };
+    
+    setMembers(currentMembers => 
+      currentMembers.map(member => {
+        if (member.id === memberId) {
+          const updatedObservacoes = [...(member.listaObservacoes || []), newObservacao];
+          return { ...member, listaObservacoes: updatedObservacoes };
+        }
+        return member;
+      })
+    );
+    
+    // Show toast notification
+    toast({
+      title: "Observação adicionada",
+      description: "A observação foi adicionada com sucesso.",
+    });
+  };
+
   return (
     <MembersContext.Provider value={{
       members,
@@ -270,7 +313,8 @@ export const MembersProvider: React.FC<{children: React.ReactNode}> = ({ childre
       updateMember,
       deleteMember,
       toggleMemberStatus,
-      addMember
+      addMember,
+      addObservacao
     }}>
       {children}
     </MembersContext.Provider>

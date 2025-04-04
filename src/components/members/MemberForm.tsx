@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -97,10 +97,73 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
   const handleFormSubmit = (values: MemberFormValues) => {
     const memberData: Membro = {
       id: defaultValues?.id || `new-${Date.now()}`,
-      ...values,
+      nome: values.nome,
+      email: values.email || "",
+      telefone: values.telefone,
+      funcao: values.funcao,
+      status: values.status,
+      dataNascimento: values.dataNascimento,
+      dataIngresso: values.dataIngresso,
+      localNascimento: values.localNascimento,
+      batizado: values.batizado,
+      endereco: values.endereco,
+      responsaveis: values.responsaveis,
+      habilidades: values.habilidades,
+      observacoes: values.observacoes,
     };
     
     onSubmit(memberData);
+  };
+
+  // Format date input as dd/mm/yyyy
+  const formatDate = (value: string) => {
+    // Remove non-numeric characters
+    let numbers = value.replace(/\D/g, '');
+    
+    // Limit to 8 digits (ddmmyyyy)
+    numbers = numbers.substring(0, 8);
+    
+    // Format as dd/mm/yyyy
+    if (numbers.length > 4) {
+      return `${numbers.substring(0, 2)}/${numbers.substring(2, 4)}/${numbers.substring(4)}`;
+    } else if (numbers.length > 2) {
+      return `${numbers.substring(0, 2)}/${numbers.substring(2)}`;
+    }
+    return numbers;
+  };
+
+  // Format phone number as (XX) XXXXX-XXXX
+  const formatPhone = (value: string) => {
+    // Remove non-numeric characters
+    let numbers = value.replace(/\D/g, '');
+    
+    // Limit to 11 digits
+    numbers = numbers.substring(0, 11);
+    
+    // Format as (XX) XXXXX-XXXX
+    if (numbers.length > 7) {
+      return `(${numbers.substring(0, 2)}) ${numbers.substring(2, 7)}-${numbers.substring(7)}`;
+    } else if (numbers.length > 2) {
+      return `(${numbers.substring(0, 2)}) ${numbers.substring(2)}`;
+    } else if (numbers.length > 0) {
+      return `(${numbers}`;
+    }
+    return numbers;
+  };
+
+  // Format CEP as XXXXX-XXX
+  const formatCEP = (value: string) => {
+    // Remove non-numeric characters
+    let numbers = value.replace(/\D/g, '');
+    
+    // Limit to 8 digits
+    numbers = numbers.substring(0, 8);
+    
+    // Format as XXXXX-XXX
+    if (numbers.length > 5) {
+      return `${numbers.substring(0, 5)}-${numbers.substring(5)}`;
+    }
+    return numbers;
   };
 
   return (
@@ -132,17 +195,14 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                 name="dataNascimento"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Nascimento</FormLabel>
+                    <FormLabel>Data de Nascimento (DD/MM/AAAA)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="date" 
+                        placeholder="DD/MM/AAAA" 
                         {...field} 
                         value={field.value || ""} 
                         onChange={(e) => {
-                          const newDate = e.target.value ? new Date(e.target.value) : null;
-                          const formattedDate = newDate ? 
-                            `${newDate.getDate().toString().padStart(2, '0')}/${(newDate.getMonth() + 1).toString().padStart(2, '0')}/${newDate.getFullYear()}` : 
-                            "";
+                          const formattedDate = formatDate(e.target.value);
                           field.onChange(formattedDate);
                         }}
                       />
@@ -152,7 +212,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                 )}
               />
               
-              {/* Local de nascimento - NEW */}
+              {/* Local de nascimento */}
               <FormField
                 control={form.control}
                 name="localNascimento"
@@ -197,7 +257,15 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                   <FormItem>
                     <FormLabel>Telefone*</FormLabel>
                     <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
+                      <Input 
+                        placeholder="(00) 00000-0000" 
+                        {...field} 
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const formattedPhone = formatPhone(e.target.value);
+                          field.onChange(formattedPhone);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -261,17 +329,14 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                 name="dataIngresso"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Ingresso</FormLabel>
+                    <FormLabel>Data de Ingresso (DD/MM/AAAA)</FormLabel>
                     <FormControl>
                       <Input 
-                        type="date" 
+                        placeholder="DD/MM/AAAA"
                         {...field} 
                         value={field.value || ""} 
                         onChange={(e) => {
-                          const newDate = e.target.value ? new Date(e.target.value) : null;
-                          const formattedDate = newDate ? 
-                            `${newDate.getDate().toString().padStart(2, '0')}/${(newDate.getMonth() + 1).toString().padStart(2, '0')}/${newDate.getFullYear()}` : 
-                            "";
+                          const formattedDate = formatDate(e.target.value);
                           field.onChange(formattedDate);
                         }}
                       />
@@ -297,7 +362,15 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                   <FormItem>
                     <FormLabel>CEP</FormLabel>
                     <FormControl>
-                      <Input placeholder="00000-000" {...field} />
+                      <Input 
+                        placeholder="00000-000" 
+                        {...field} 
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const formattedCEP = formatCEP(e.target.value);
+                          field.onChange(formattedCEP);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -424,7 +497,15 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                   <FormItem>
                     <FormLabel>Telefone do Pai</FormLabel>
                     <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
+                      <Input 
+                        placeholder="(00) 00000-0000" 
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const formattedPhone = formatPhone(e.target.value);
+                          field.onChange(formattedPhone);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -454,7 +535,15 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                   <FormItem>
                     <FormLabel>Telefone da Mãe</FormLabel>
                     <FormControl>
-                      <Input placeholder="(00) 00000-0000" {...field} />
+                      <Input 
+                        placeholder="(00) 00000-0000" 
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const formattedPhone = formatPhone(e.target.value);
+                          field.onChange(formattedPhone);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
