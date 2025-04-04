@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -79,17 +78,55 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     // Create or update the small group
     if (isEditing && smallGroup) {
+      // Certifique-se de que todos os campos requeridos do smallGroup sejam preservados
       updateSmallGroup({
         ...smallGroup,
-        ...data,
+        nome: data.nome,
+        endereco: {
+          rua: data.endereco.rua,
+          numero: data.endereco.numero,
+          cep: data.endereco.cep,
+          bairro: data.endereco.bairro,
+          cidade: data.endereco.cidade,
+          estado: data.endereco.estado,
+        },
+        responsavel: {
+          nome: data.responsavel.nome,
+          telefone: data.responsavel.telefone,
+          email: data.responsavel.email,
+        },
+        frequencia: data.frequencia,
+        diaSemana: data.diaSemana,
+        horario: data.horario,
+        descricao: data.descricao,
       });
     } else {
-      addSmallGroup({
-        ...data,
+      // Criar um novo pequeno grupo com os campos obrigatórios
+      const novoGrupo: SmallGroup = {
         id: `${Date.now()}`,
+        nome: data.nome,
+        endereco: {
+          rua: data.endereco.rua,
+          numero: data.endereco.numero,
+          cep: data.endereco.cep,
+          bairro: data.endereco.bairro,
+          cidade: data.endereco.cidade,
+          estado: data.endereco.estado,
+        },
+        responsavel: {
+          nome: data.responsavel.nome,
+          telefone: data.responsavel.telefone,
+          email: data.responsavel.email,
+        },
+        frequencia: data.frequencia,
+        diaSemana: data.diaSemana,
+        horario: data.horario,
+        descricao: data.descricao,
         membros: [],
         chamadas: []
-      });
+      };
+      
+      addSmallGroup(novoGrupo);
     }
     
     // Call the success callback if provided

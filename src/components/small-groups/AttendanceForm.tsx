@@ -122,14 +122,13 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     onChange(formattedValue);
   };
   
-  // Format phone input
+  // Format phone input - corrigido para não usar SetStateAction
   const handlePhoneChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setValue: React.Dispatch<React.SetStateAction<string>>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value.replace(/\D/g, '');
     const formattedValue = formatPhoneNumber(value);
-    setValue(formattedValue);
+    setNovoVisitante({...novoVisitante, telefone: formattedValue});
   };
   
   return (
@@ -228,9 +227,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
                         <Input
                           id="visitor-phone"
                           value={novoVisitante.telefone}
-                          onChange={(e) => handlePhoneChange(e, (value) => 
-                            setNovoVisitante({...novoVisitante, telefone: value})
-                          )}
+                          onChange={handlePhoneChange}
                           placeholder="(00) 00000-0000"
                           maxLength={15}
                         />
