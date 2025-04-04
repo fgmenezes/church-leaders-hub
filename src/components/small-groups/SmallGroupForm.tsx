@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useSmallGroups } from '@/contexts/SmallGroupsContext';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,29 +16,31 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useSmallGroups, SmallGroup } from '@/contexts/SmallGroupsContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { formatPhoneNumber, formatCep, estados } from '@/utils/formatters';
+import { estadosBrasileiros } from '@/utils/estados-brasileiros';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { formatPhoneNumber } from '@/utils/formatters';
 
+// Schema para validação do formulário
 const formSchema = z.object({
-  nome: z.string().min(2, { message: 'Nome deve ter pelo menos 2 caracteres' }),
+  nome: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
+  descricao: z.string().optional(),
   endereco: z.object({
-    rua: z.string().min(2, { message: 'Rua é obrigatória' }),
+    rua: z.string().min(3, { message: 'A rua deve ter pelo menos 3 caracteres' }),
     numero: z.string(),
-    cep: z.string().min(8, { message: 'CEP deve ter 8 dígitos' }).max(9),
-    bairro: z.string().min(2, { message: 'Bairro é obrigatório' }),
-    cidade: z.string().min(2, { message: 'Cidade é obrigatória' }),
-    estado: z.string().min(2, { message: 'Estado é obrigatório' }),
+    cep: z.string().min(8, { message: 'CEP inválido' }).max(9),
+    bairro: z.string().min(2, { message: 'O bairro deve ter pelo menos 2 caracteres' }),
+    cidade: z.string().min(2, { message: 'A cidade deve ter pelo menos 2 caracteres' }),
+    estado: z.string().min(2, { message: 'Selecione um estado' }),
   }),
   responsavel: z.object({
-    nome: z.string().min(2, { message: 'Nome do responsável é obrigatório' }),
-    telefone: z.string().min(10, { message: 'Telefone deve ter no mínimo 10 dígitos' }),
-    email: z.string().email({ message: 'Email inválido' }),
+    nome: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
+    telefone: z.string().min(8, { message: 'Telefone inválido' }),
+    email: z.string().email({ message: 'Email inválido' }).optional().or(z.literal('')),
   }),
-  frequencia: z.string().min(1, { message: 'Frequência é obrigatória' }),
-  diaSemana: z.string().min(1, { message: 'Dia da semana é obrigatório' }),
-  horario: z.string().min(1, { message: 'Horário é obrigatório' }),
-  descricao: z.string().optional(),
+  frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal']),
+  diaSemana: z.enum(['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']).optional(),
+  horario: z.string().optional(),
 });
 
 interface SmallGroupFormProps {
@@ -43,38 +48,73 @@ interface SmallGroupFormProps {
   onSuccess?: () => void;
 }
 
-export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({ 
-  smallGroup,
-  onSuccess 
-}) => {
+export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) => {
   const { addSmallGroup, updateSmallGroup } = useSmallGroups();
   const isEditing = !!smallGroup;
   
-  // Initialize form with existing data or defaults
+  // Inicializar o form com os valores do grupo sendo editado, se houver
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      nome: smallGroup?.nome || '',
-      endereco: {
-        rua: smallGroup?.endereco?.rua || '',
-        numero: smallGroup?.endereco?.numero || '',
-        cep: smallGroup?.endereco?.cep || '',
-        bairro: smallGroup?.endereco?.bairro || '',
-        cidade: smallGroup?.endereco?.cidade || '',
-        estado: smallGroup?.endereco?.estado || '',
-      },
-      responsavel: {
-        nome: smallGroup?.responsavel?.nome || '',
-        telefone: smallGroup?.responsavel?.telefone || '',
-        email: smallGroup?.responsavel?.email || '',
-      },
-      frequencia: smallGroup?.frequencia || '',
-      diaSemana: smallGroup?.diaSemana || '',
-      horario: smallGroup?.horario || '',
-      descricao: smallGroup?.descricao || '',
-    },
+    defaultValues: isEditing
+      ? {
+          nome: smallGroup.nome,
+          descricao: smallGroup.descricao || '',
+          endereco: {
+            rua: smallGroup.endereco.rua,
+            numero: smallGroup.endereco.numero,
+            cep: smallGroup.endereco.cep,
+            bairro: smallGroup.endereco.bairro,
+            cidade: smallGroup.endereco.cidade,
+            estado: smallGroup.endereco.estado,
+          },
+          responsavel: {
+            nome: smallGroup.responsavel.nome,
+            telefone: smallGroup.responsavel.telefone,
+            email: smallGroup.responsavel.email || '',
+          },
+          frequencia: smallGroup.frequencia || 'semanal',
+          diaSemana: smallGroup.diaSemana || 'domingo',
+          horario: smallGroup.horario || '',
+        }
+      : {
+          nome: '',
+          descricao: '',
+          endereco: {
+            rua: '',
+            numero: '',
+            cep: '',
+            bairro: '',
+            cidade: '',
+            estado: '',
+          },
+          responsavel: {
+            nome: '',
+            telefone: '',
+            email: '',
+          },
+          frequencia: 'semanal',
+          diaSemana: 'domingo',
+          horario: '',
+        },
   });
   
+  // Formatar telefone durante digitação
+  const formatarTelefone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    const formattedValue = formatPhoneNumber(value);
+    form.setValue('responsavel.telefone', formattedValue);
+  };
+  
+  // Formatar CEP durante digitação
+  const formatarCEP = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    const formattedValue = value.length > 5 
+      ? `${value.slice(0, 5)}-${value.slice(5, 8)}`
+      : value;
+    form.setValue('endereco.cep', formattedValue);
+  };
+  
+  // Enviar dados do formulário
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     // Create or update the small group
     if (isEditing && smallGroup) {
@@ -130,43 +170,19 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
     }
     
     // Call the success callback if provided
-    if (onSuccess) onSuccess();
+    if (onSuccess) {
+      onSuccess();
+    }
   };
-  
-  // Format phone number as user types
-  const handlePhoneChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (value: string) => void
-  ) => {
-    const value = e.target.value.replace(/\D/g, '');
-    const formattedValue = formatPhoneNumber(value);
-    onChange(formattedValue);
-  };
-  
-  // Format CEP as user types
-  const handleCepChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (value: string) => void
-  ) => {
-    const value = e.target.value.replace(/\D/g, '');
-    let formattedValue = formatCep(value);
-    onChange(formattedValue);
-  };
-  
-  const diasSemana = [
-    'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
-    'Quinta-feira', 'Sexta-feira', 'Sábado'
-  ];
-  
-  const frequencias = [
-    'diario', 'semanal', 'quinzenal', 'mensal'
-  ];
   
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardContent className="pt-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>{isEditing ? 'Editar Pequeno Grupo' : 'Novo Pequeno Grupo'}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <FormField
                 control={form.control}
@@ -182,72 +198,6 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                 )}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="frequencia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Frequência dos Encontros</FormLabel>
-                      <FormControl>
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          {...field}
-                        >
-                          <option value="" disabled>Selecione a frequência</option>
-                          {frequencias.map((frequencia) => (
-                            <option key={frequencia} value={frequencia}>
-                              {frequencia.charAt(0).toUpperCase() + frequencia.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="diaSemana"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dia da Semana</FormLabel>
-                      <FormControl>
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          {...field}
-                        >
-                          <option value="" disabled>Selecione um dia</option>
-                          {diasSemana.map((dia) => (
-                            <option key={dia} value={dia}>{dia}</option>
-                          ))}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="horario"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Horário</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="time"
-                          placeholder="19:00"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
               <FormField
                 control={form.control}
                 name="descricao"
@@ -255,8 +205,8 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                   <FormItem>
                     <FormLabel>Descrição</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Descrição do pequeno grupo"
+                      <Textarea 
+                        placeholder="Descreva brevemente o objetivo ou foco deste grupo"
                         {...field}
                       />
                     </FormControl>
@@ -264,97 +214,93 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                   </FormItem>
                 )}
               />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-4">Informações do Responsável</h3>
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="responsavel.nome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome do Responsável</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do responsável" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-muted/50 p-4 rounded-md space-y-4">
+                <h3 className="font-medium">Encontros</h3>
+                
                 <FormField
                   control={form.control}
-                  name="responsavel.telefone"
-                  render={({ field: { onChange, ...rest } }) => (
-                    <FormItem>
-                      <FormLabel>Telefone do Responsável</FormLabel>
+                  name="frequencia"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel>Frequência</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="(00) 00000-0000"
-                          {...rest}
-                          onChange={(e) => handlePhoneChange(e, onChange)}
-                          maxLength={15}
-                        />
+                        <RadioGroup 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                          className="flex flex-wrap gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="diaria" id="diaria" />
+                            <FormLabel htmlFor="diaria" className="font-normal">Diária</FormLabel>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="semanal" id="semanal" />
+                            <FormLabel htmlFor="semanal" className="font-normal">Semanal</FormLabel>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="quinzenal" id="quinzenal" />
+                            <FormLabel htmlFor="quinzenal" className="font-normal">Quinzenal</FormLabel>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="mensal" id="mensal" />
+                            <FormLabel htmlFor="mensal" className="font-normal">Mensal</FormLabel>
+                          </div>
+                        </RadioGroup>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="responsavel.email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email do Responsável</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="email@exemplo.com"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-medium mb-4">Endereço do Encontro</h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="endereco.cep"
-                  render={({ field: { onChange, ...rest } }) => (
-                    <FormItem>
-                      <FormLabel>CEP</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="00000-000"
-                          {...rest}
-                          onChange={(e) => handleCepChange(e, onChange)}
-                          maxLength={9}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="diaSemana"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dia da Semana</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o dia" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="domingo">Domingo</SelectItem>
+                            <SelectItem value="segunda">Segunda-feira</SelectItem>
+                            <SelectItem value="terca">Terça-feira</SelectItem>
+                            <SelectItem value="quarta">Quarta-feira</SelectItem>
+                            <SelectItem value="quinta">Quinta-feira</SelectItem>
+                            <SelectItem value="sexta">Sexta-feira</SelectItem>
+                            <SelectItem value="sabado">Sábado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="horario"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Horário</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-3">
+              <div className="bg-muted/50 p-4 rounded-md space-y-4">
+                <h3 className="font-medium">Endereço</h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="endereco.rua"
@@ -362,7 +308,21 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                       <FormItem>
                         <FormLabel>Rua</FormLabel>
                         <FormControl>
-                          <Input placeholder="Rua/Avenida" {...field} />
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="endereco.numero"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -370,84 +330,149 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                   />
                 </div>
                 
-                <FormField
-                  control={form.control}
-                  name="endereco.numero"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="endereco.cep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={field.value}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              formatarCEP(e);
+                            }}
+                            maxLength={9}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="endereco.bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="endereco.cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="endereco.estado"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {estadosBrasileiros.map((estado) => (
+                              <SelectItem key={estado.sigla} value={estado.sigla}>
+                                {estado.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               
-              <FormField
-                control={form.control}
-                name="endereco.bairro"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bairro</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Bairro" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-muted/50 p-4 rounded-md space-y-4">
+                <h3 className="font-medium">Responsável pelo Local</h3>
+                
                 <FormField
                   control={form.control}
-                  name="endereco.cidade"
+                  name="responsavel.nome"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cidade</FormLabel>
+                      <FormLabel>Nome</FormLabel>
                       <FormControl>
-                        <Input placeholder="Cidade" {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="endereco.estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          {...field}
-                        >
-                          <option value="" disabled>Selecione um estado</option>
-                          {estados.map((estado) => (
-                            <option key={estado.sigla} value={estado.sigla}>
-                              {estado.sigla}
-                            </option>
-                          ))}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="responsavel.telefone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={field.value}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              formatarTelefone(e);
+                            }}
+                            maxLength={15}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="responsavel.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email (opcional)</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-end">
-          <Button type="submit">
-            {isEditing ? 'Atualizar Pequeno Grupo' : 'Adicionar Pequeno Grupo'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            
+            <CardFooter className="px-0 pb-0">
+              <Button type="submit">
+                {isEditing ? 'Salvar Alterações' : 'Criar Pequeno Grupo'}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };

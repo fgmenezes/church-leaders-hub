@@ -1,128 +1,132 @@
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSmallGroups } from '@/contexts/SmallGroupsContext';
+import { useMembers } from '@/contexts/MembersContext';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { formatDateInput, formatPhoneNumber } from '@/utils/formatters';
-import { useSmallGroups, Visitor } from '@/contexts/SmallGroupsContext';
-import { Membro } from '@/contexts/MembersContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { formatPhoneNumber } from '@/utils/formatters';
+import { Calendar, Clock, UserPlus } from 'lucide-react';
 
-const visitanteSchema = z.object({
-  nome: z.string().min(2, { message: 'Nome é obrigatório' }),
-  telefone: z.string().min(10, { message: 'Telefone deve ter no mínimo 10 dígitos' }),
-  convidadoPor: z.string().min(2, { message: 'Informe quem convidou o visitante' }),
-});
+type Visitante = {
+  nome: string;
+  telefone: string;
+  convidadoPor: string;
+};
 
-const formSchema = z.object({
-  data: z.string().min(10, { message: 'Data é obrigatória' }),
-  membrosPresentes: z.array(z.string()).min(1, { message: 'Marque pelo menos um membro presente' }),
-});
-
-interface AttendanceFormProps {
-  groupId: string;
-  membros: Membro[];
-  onSuccess?: () => void;
-}
-
-export const AttendanceForm: React.FC<AttendanceFormProps> = ({ 
-  groupId,
-  membros,
-  onSuccess
-}) => {
-  const { addAttendance } = useSmallGroups();
-  const [visitantes, setVisitantes] = useState<Visitor[]>([]);
-  const [novoVisitante, setNovoVisitante] = useState({
+export const AttendanceForm = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { smallGroups, registerAttendance, getSmallGroupById } = useSmallGroups();
+  const { members } = useMembers();
+  
+  const [smallGroup, setSmallGroup] = useState<SmallGroup | null>(null);
+  const [date, setDate] = useState<string>(new Date().toISOString().substring(0, 10));
+  const [membrosPresentes, setMembrosPresentes] = useState<string[]>([]);
+  const [visitantes, setVisitantes] = useState<Visitante[]>([]);
+  const [novoVisitante, setNovoVisitante] = useState<Visitante>({
     nome: '',
     telefone: '',
     convidadoPor: '',
   });
-  const [visitanteError, setVisitanteError] = useState<string | null>(null);
   
-  // Initialize form with default values
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      data: new Date().toLocaleDateString('pt-BR'),
-      membrosPresentes: [],
-    },
-  });
-  
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Create a new attendance record
-    addAttendance(groupId, {
-      data: data.data,
-      membrosPresentes: data.membrosPresentes,
-      visitantes: visitantes,
-    });
-    
-    // Reset form
-    form.reset({
-      data: new Date().toLocaleDateString('pt-BR'),
-      membrosPresentes: [],
-    });
-    setVisitantes([]);
-    
-    // Call the success callback if provided
-    if (onSuccess) onSuccess();
+  // Formatar data para exibição
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
   };
   
-  // Handle add visitor
-  const handleAddVisitante = () => {
-    // Validate visitor data
-    try {
-      visitanteSchema.parse(novoVisitante);
-      
-      // Add to visitors list
-      const newVisitor: Visitor = {
-        ...novoVisitante,
-        id: `v-${Date.now()}`,
-      };
-      
-      setVisitantes(prev => [...prev, newVisitor]);
-      
-      // Reset form
-      setNovoVisitante({
-        nome: '',
-        telefone: '',
-        convidadoPor: '',
-      });
-      setVisitanteError(null);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0];
-        setVisitanteError(firstError.message);
+  // Carregar dados do pequeno grupo
+  useEffect(() => {
+    if (id) {
+      const group = getSmallGroupById(id);
+      if (group) {
+        setSmallGroup(group);
+      } else {
+        navigate('/pequenos-grupos');
+        toast({
+          title: "Grupo não encontrado",
+          description: "O pequeno grupo solicitado não foi encontrado.",
+          variant: "destructive",
+        });
       }
+    }
+  }, [id, smallGroups, navigate, toast, getSmallGroupById]);
+  
+  // Membros filtrados que pertencem a este pequeno grupo
+  const membrosDoPequenoGrupo = members.filter(membro => 
+    smallGroup?.membros.includes(membro.id)
+  );
+  
+  // Manipular alteração da seleção de membros presentes
+  const handleMembroChange = (membroId: string, checked: boolean) => {
+    if (checked) {
+      setMembrosPresentes(prev => [...prev, membroId]);
+    } else {
+      setMembrosPresentes(prev => prev.filter(id => id !== membroId));
     }
   };
   
-  // Handle remove visitor
-  const handleRemoveVisitante = (id: string) => {
-    setVisitantes(prev => prev.filter(v => v.id !== id));
+  // Adicionar novo visitante
+  const handleAddVisitante = () => {
+    if (novoVisitante.nome.trim() === '') {
+      toast({
+        title: "Nome obrigatório",
+        description: "O nome do visitante é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setVisitantes(prev => [...prev, { ...novoVisitante }]);
+    setNovoVisitante({
+      nome: '',
+      telefone: '',
+      convidadoPor: '',
+    });
   };
   
-  // Format date input
-  const handleDateChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (value: string) => void
-  ) => {
-    const formattedValue = formatDateInput(e.target.value);
-    onChange(formattedValue);
+  // Remover visitante
+  const handleRemoveVisitante = (index: number) => {
+    setVisitantes(prev => prev.filter((_, i) => i !== index));
   };
   
-  // Format phone input - corrigido para não usar SetStateAction
+  // Salvar registro de presença
+  const handleSaveAttendance = () => {
+    if (!smallGroup || !id) return;
+    
+    if (membrosPresentes.length === 0 && visitantes.length === 0) {
+      toast({
+        title: "Nenhum participante",
+        description: "Adicione pelo menos um membro ou visitante presente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const novoRegistro = {
+      id: `${Date.now()}`,
+      data: date,
+      membrosPresentes,
+      visitantes,
+    };
+    
+    registerAttendance(id, novoRegistro);
+    toast({
+      title: "Presença registrada",
+      description: `Registro de presença para ${formatDate(date)} salvo com sucesso.`,
+    });
+    
+    // Retornar para a página de detalhes do grupo
+    navigate(`/pequenos-grupos/${id}`);
+  };
+  
+  // Format phone input
   const handlePhoneChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -135,166 +139,130 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Registrar Presença</CardTitle>
-          <CardDescription>
-            Marque os membros presentes e registre visitantes
-          </CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Registro de Presença - {smallGroup?.nome}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="data"
-                render={({ field: { onChange, ...rest } }) => (
-                  <FormItem>
-                    <FormLabel>Data do Encontro</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="dd/mm/aaaa"
-                        {...rest}
-                        onChange={(e) => handleDateChange(e, onChange)}
-                        maxLength={10}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div>
-                <FormLabel className="block mb-3">Membros Presentes</FormLabel>
-                {membros.length === 0 ? (
-                  <p className="text-muted-foreground py-2">
-                    Este grupo não tem membros cadastrados.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border rounded-md p-4">
-                    {membros.map(membro => (
-                      <FormField
-                        key={membro.id}
-                        control={form.control}
-                        name="membrosPresentes"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(membro.id)}
-                                onCheckedChange={(checked) => {
-                                  const currentValue = field.value || [];
-                                  
-                                  if (checked) {
-                                    field.onChange([...currentValue, membro.id]);
-                                  } else {
-                                    field.onChange(
-                                      currentValue.filter((value) => value !== membro.id)
-                                    );
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              {membro.nome}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="date">Data do Encontro</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-2">Membros Presentes</h3>
+            {membrosDoPequenoGrupo.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {membrosDoPequenoGrupo.map((membro) => (
+                  <div key={membro.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`membro-${membro.id}`}
+                      checked={membrosPresentes.includes(membro.id)}
+                      onCheckedChange={(checked) => 
+                        handleMembroChange(membro.id, checked === true)
+                      }
+                    />
+                    <Label htmlFor={`membro-${membro.id}`}>{membro.nome}</Label>
                   </div>
-                )}
-                <FormMessage>
-                  {form.formState.errors.membrosPresentes?.message}
-                </FormMessage>
+                ))}
               </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <h3 className="text-base font-medium mb-2">Visitantes</h3>
-                  
-                  <div className="border rounded-md p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                      <div>
-                        <FormLabel htmlFor="visitor-name">Nome</FormLabel>
-                        <Input
-                          id="visitor-name"
-                          value={novoVisitante.nome}
-                          onChange={(e) => setNovoVisitante({...novoVisitante, nome: e.target.value})}
-                          placeholder="Nome do visitante"
-                        />
-                      </div>
-                      <div>
-                        <FormLabel htmlFor="visitor-phone">Telefone</FormLabel>
-                        <Input
-                          id="visitor-phone"
-                          value={novoVisitante.telefone}
-                          onChange={handlePhoneChange}
-                          placeholder="(00) 00000-0000"
-                          maxLength={15}
-                        />
-                      </div>
-                      <div>
-                        <FormLabel htmlFor="visitor-invitedBy">Convidado por</FormLabel>
-                        <Input
-                          id="visitor-invitedBy"
-                          value={novoVisitante.convidadoPor}
-                          onChange={(e) => setNovoVisitante({...novoVisitante, convidadoPor: e.target.value})}
-                          placeholder="Quem convidou?"
-                        />
-                      </div>
+            ) : (
+              <p className="text-muted-foreground">
+                Não há membros vinculados a este pequeno grupo.
+              </p>
+            )}
+          </div>
+          
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-2">Visitantes</h3>
+            
+            {visitantes.length > 0 && (
+              <div className="space-y-4 mb-4">
+                {visitantes.map((visitante, index) => (
+                  <div key={index} className="flex items-center justify-between border p-2 rounded-md">
+                    <div>
+                      <p className="font-medium">{visitante.nome}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {visitante.telefone} • Convidado por: {visitante.convidadoPor || "Não informado"}
+                      </p>
                     </div>
-                    
-                    {visitanteError && (
-                      <p className="text-sm font-medium text-destructive mb-3">{visitanteError}</p>
-                    )}
-                    
-                    <Button 
-                      type="button" 
-                      onClick={handleAddVisitante}
-                      variant="outline"
-                      className="w-full"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveVisitante(index)}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Visitante
+                      Remover
                     </Button>
-                    
-                    {visitantes.length > 0 && (
-                      <div className="mt-4 border-t pt-4">
-                        <h4 className="text-sm font-medium mb-2">Visitantes adicionados:</h4>
-                        <div className="space-y-2">
-                          {visitantes.map(visitante => (
-                            <div key={visitante.id} className="flex items-center justify-between bg-muted p-2 rounded-md">
-                              <div>
-                                <span className="font-medium">{visitante.nome}</span>
-                                <span className="text-muted-foreground text-sm ml-2">
-                                  {visitante.telefone}
-                                </span>
-                              </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveVisitante(visitante.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="border rounded-md p-4 space-y-3">
+              <h4 className="font-medium flex items-center gap-1">
+                <UserPlus className="h-4 w-4" />
+                Adicionar Visitante
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="visitor-name">Nome</Label>
+                  <Input
+                    id="visitor-name"
+                    value={novoVisitante.nome}
+                    onChange={(e) => setNovoVisitante({...novoVisitante, nome: e.target.value})}
+                    placeholder="Nome do visitante"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="visitor-phone">Telefone</Label>
+                  <Input
+                    id="visitor-phone"
+                    value={novoVisitante.telefone}
+                    onChange={handlePhoneChange}
+                    placeholder="(00) 00000-0000"
+                    maxLength={15}
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <Label htmlFor="invited-by">Convidado por</Label>
+                  <Input
+                    id="invited-by"
+                    value={novoVisitante.convidadoPor}
+                    onChange={(e) => setNovoVisitante({...novoVisitante, convidadoPor: e.target.value})}
+                    placeholder="Nome de quem convidou"
+                  />
                 </div>
               </div>
               
-              <div className="flex justify-end">
-                <Button type="submit">
-                  <Check className="h-4 w-4 mr-2" />
-                  Registrar Presença
-                </Button>
-              </div>
-            </form>
-          </Form>
+              <Button 
+                type="button" 
+                onClick={handleAddVisitante}
+                variant="outline"
+                className="mt-2"
+              >
+                Adicionar Visitante
+              </Button>
+            </div>
+          </div>
         </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="outline" onClick={() => navigate(`/pequenos-grupos/${id}`)}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSaveAttendance}>
+            Salvar Registro de Presença
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

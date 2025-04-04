@@ -1,262 +1,216 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-// Define the Visitor interface
-export interface Visitor {
-  id: string;
+// Definição dos tipos
+interface SmallGroupAddress {
+  rua: string;
+  numero: string;
+  cep: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+}
+
+interface SmallGroupResponsible {
+  nome: string;
+  telefone: string;
+  email?: string;
+}
+
+interface Visitor {
   nome: string;
   telefone: string;
   convidadoPor: string;
 }
 
-// Define the Attendance interface
-export interface Attendance {
+interface AttendanceRecord {
   id: string;
   data: string;
   membrosPresentes: string[];
   visitantes: Visitor[];
 }
 
-// Define the SmallGroup interface
-export interface SmallGroup {
+interface SmallGroup {
   id: string;
   nome: string;
-  endereco: {
-    rua: string;
-    numero: string;
-    cep: string;
-    bairro: string;
-    cidade: string;
-    estado: string;
-  };
-  responsavel: {
-    nome: string;
-    telefone: string;
-    email: string;
-  };
-  membros: string[]; // Array of member IDs
-  diaSemana: string;
-  horario: string;
-  frequencia: string; // 'semanal', 'quinzenal', 'mensal', 'diario'
   descricao?: string;
-  chamadas?: Attendance[];
+  endereco: SmallGroupAddress;
+  responsavel: SmallGroupResponsible;
+  frequencia: 'diaria' | 'semanal' | 'quinzenal' | 'mensal';
+  diaSemana?: 'domingo' | 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado';
+  horario?: string;
+  membros: string[];
+  chamadas: AttendanceRecord[];
 }
-
-// Initial dummy data
-const initialSmallGroups: SmallGroup[] = [
-  {
-    id: '1',
-    nome: 'Grupo Esperança',
-    endereco: {
-      rua: 'Rua das Flores',
-      numero: '123',
-      cep: '01234-567',
-      bairro: 'Centro',
-      cidade: 'São Paulo',
-      estado: 'SP'
-    },
-    responsavel: {
-      nome: 'João Silva',
-      telefone: '(11) 98765-4321',
-      email: 'joao.silva@email.com'
-    },
-    membros: ['1', '2', '5'],
-    diaSemana: 'Quarta-feira',
-    horario: '19:30',
-    frequencia: 'semanal',
-    descricao: 'Grupo dedicado ao estudo bíblico e oração.',
-    chamadas: []
-  },
-  {
-    id: '2',
-    nome: 'Grupo Família',
-    endereco: {
-      rua: 'Av. Paulista',
-      numero: '1000',
-      cep: '04567-890',
-      bairro: 'Bela Vista',
-      cidade: 'São Paulo',
-      estado: 'SP'
-    },
-    responsavel: {
-      nome: 'Maria Oliveira',
-      telefone: '(11) 91234-5678',
-      email: 'maria.oliveira@email.com'
-    },
-    membros: ['3', '4'],
-    diaSemana: 'Sexta-feira',
-    horario: '20:00',
-    frequencia: 'quinzenal',
-    descricao: 'Grupo voltado para famílias e casais.',
-    chamadas: []
-  }
-];
 
 interface SmallGroupsContextType {
   smallGroups: SmallGroup[];
-  getSmallGroup: (id: string) => SmallGroup | null;
-  updateSmallGroup: (group: SmallGroup) => void;
-  deleteSmallGroup: (id: string) => void;
   addSmallGroup: (group: SmallGroup) => void;
+  updateSmallGroup: (updatedGroup: SmallGroup) => void;
+  deleteSmallGroup: (id: string) => void;
+  getSmallGroupById: (id: string) => SmallGroup | undefined;
   addMemberToGroup: (groupId: string, memberId: string) => void;
   removeMemberFromGroup: (groupId: string, memberId: string) => void;
-  addAttendance: (groupId: string, attendance: Omit<Attendance, 'id'>) => void;
+  registerAttendance: (groupId: string, attendance: AttendanceRecord) => void;
 }
 
+// Criação do contexto
 const SmallGroupsContext = createContext<SmallGroupsContextType | undefined>(undefined);
 
-export const SmallGroupsProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [smallGroups, setSmallGroups] = useState<SmallGroup[]>([]);
-
-  // Load small groups from localStorage on initial render
-  useEffect(() => {
-    const storedSmallGroups = localStorage.getItem('smallGroups');
-    if (storedSmallGroups) {
+// Provider
+export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { toast } = useToast();
+  const [smallGroups, setSmallGroups] = useState<SmallGroup[]>(() => {
+    const saved = localStorage.getItem('smallGroups');
+    if (saved) {
       try {
-        setSmallGroups(JSON.parse(storedSmallGroups));
+        return JSON.parse(saved);
       } catch (error) {
-        console.error("Failed to parse stored small groups", error);
-        setSmallGroups(initialSmallGroups);
+        console.error('Erro ao carregar dados de pequenos grupos:', error);
+        return [];
       }
-    } else {
-      setSmallGroups(initialSmallGroups);
     }
-  }, []);
+    return [];
+  });
 
-  // Save small groups to localStorage whenever they change
+  // Salvar no localStorage quando o estado mudar
   useEffect(() => {
     localStorage.setItem('smallGroups', JSON.stringify(smallGroups));
   }, [smallGroups]);
 
-  const getSmallGroup = (id: string): SmallGroup | null => {
-    return smallGroups.find(group => group.id === id) || null;
+  // Adicionar novo grupo
+  const addSmallGroup = (group: SmallGroup) => {
+    setSmallGroups(prev => [...prev, group]);
+    toast({
+      title: "Grupo criado",
+      description: `${group.nome} foi criado com sucesso.`,
+    });
   };
 
-  const updateSmallGroup = (updatedGroup: SmallGroup): void => {
-    setSmallGroups(currentGroups => 
-      currentGroups.map(group => 
+  // Atualizar grupo existente
+  const updateSmallGroup = (updatedGroup: SmallGroup) => {
+    setSmallGroups(prev => 
+      prev.map(group => 
         group.id === updatedGroup.id ? updatedGroup : group
       )
     );
-    
-    // Show toast notification
     toast({
-      title: "Pequeno Grupo atualizado",
+      title: "Grupo atualizado",
       description: `${updatedGroup.nome} foi atualizado com sucesso.`,
     });
   };
 
-  const deleteSmallGroup = (id: string): void => {
-    const groupToDelete = getSmallGroup(id);
-    setSmallGroups(currentGroups => 
-      currentGroups.filter(group => group.id !== id)
-    );
-    
-    // Show toast notification if the group was found
+  // Excluir grupo
+  const deleteSmallGroup = (id: string) => {
+    const groupToDelete = smallGroups.find(g => g.id === id);
     if (groupToDelete) {
+      setSmallGroups(prev => prev.filter(group => group.id !== id));
       toast({
-        title: "Pequeno Grupo removido",
-        description: `${groupToDelete.nome} foi removido com sucesso.`,
+        title: "Grupo excluído",
+        description: `${groupToDelete.nome} foi excluído com sucesso.`,
       });
     }
   };
 
-  const addSmallGroup = (newGroup: SmallGroup): void => {
-    // Ensure new group has a valid ID
-    const groupWithId = {
-      ...newGroup,
-      id: newGroup.id || `${Date.now()}`
-    };
-    
-    setSmallGroups(currentGroups => [...currentGroups, groupWithId]);
-    
-    // Show toast notification
-    toast({
-      title: "Pequeno Grupo adicionado",
-      description: `${newGroup.nome} foi adicionado com sucesso.`,
-    });
+  // Buscar grupo por ID
+  const getSmallGroupById = (id: string) => {
+    return smallGroups.find(group => group.id === id);
   };
 
-  const addMemberToGroup = (groupId: string, memberId: string): void => {
-    setSmallGroups(currentGroups => 
-      currentGroups.map(group => {
+  // Adicionar membro ao grupo
+  const addMemberToGroup = (groupId: string, memberId: string) => {
+    setSmallGroups(prev => 
+      prev.map(group => {
         if (group.id === groupId && !group.membros.includes(memberId)) {
-          const updatedMembros = [...group.membros, memberId];
-          return { ...group, membros: updatedMembros };
+          return { ...group, membros: [...group.membros, memberId] };
         }
         return group;
       })
     );
-    
-    // Show toast notification
-    toast({
-      title: "Membro adicionado ao grupo",
-      description: "O membro foi adicionado ao pequeno grupo com sucesso.",
-    });
   };
 
-  const removeMemberFromGroup = (groupId: string, memberId: string): void => {
-    setSmallGroups(currentGroups => 
-      currentGroups.map(group => {
+  // Remover membro do grupo
+  const removeMemberFromGroup = (groupId: string, memberId: string) => {
+    setSmallGroups(prev => 
+      prev.map(group => {
         if (group.id === groupId) {
-          const updatedMembros = group.membros.filter(id => id !== memberId);
-          return { ...group, membros: updatedMembros };
+          return { ...group, membros: group.membros.filter(id => id !== memberId) };
         }
         return group;
       })
     );
-    
-    // Show toast notification
-    toast({
-      title: "Membro removido do grupo",
-      description: "O membro foi removido do pequeno grupo com sucesso.",
-    });
   };
 
-  const addAttendance = (groupId: string, attendance: Omit<Attendance, 'id'>): void => {
-    const newAttendance: Attendance = {
-      ...attendance,
-      id: `att-${Date.now()}`
-    };
-    
-    setSmallGroups(currentGroups => 
-      currentGroups.map(group => {
+  // Registrar presença em um encontro
+  const registerAttendance = (groupId: string, attendance: AttendanceRecord) => {
+    setSmallGroups(prev => 
+      prev.map(group => {
         if (group.id === groupId) {
-          const updatedChamadas = [...(group.chamadas || []), newAttendance];
-          return { ...group, chamadas: updatedChamadas };
+          return { ...group, chamadas: [...group.chamadas, attendance] };
         }
         return group;
       })
     );
-    
-    // Show toast notification
-    toast({
-      title: "Lista de presença registrada",
-      description: "A lista de presença foi registrada com sucesso.",
-    });
   };
 
   return (
     <SmallGroupsContext.Provider value={{
       smallGroups,
-      getSmallGroup,
+      addSmallGroup,
       updateSmallGroup,
       deleteSmallGroup,
-      addSmallGroup,
+      getSmallGroupById,
       addMemberToGroup,
       removeMemberFromGroup,
-      addAttendance
+      registerAttendance,
     }}>
       {children}
     </SmallGroupsContext.Provider>
   );
 };
 
-export const useSmallGroups = (): SmallGroupsContextType => {
+// Hook para usar o contexto
+export const useSmallGroups = () => {
   const context = useContext(SmallGroupsContext);
   if (context === undefined) {
     throw new Error('useSmallGroups must be used within a SmallGroupsProvider');
   }
   return context;
 };
+
+// Adicionar tipos globais
+declare global {
+  interface SmallGroup {
+    id: string;
+    nome: string;
+    descricao?: string;
+    endereco: {
+      rua: string;
+      numero: string;
+      cep: string;
+      bairro: string;
+      cidade: string;
+      estado: string;
+    };
+    responsavel: {
+      nome: string;
+      telefone: string;
+      email?: string;
+    };
+    frequencia: 'diaria' | 'semanal' | 'quinzenal' | 'mensal';
+    diaSemana?: 'domingo' | 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado';
+    horario?: string;
+    membros: string[];
+    chamadas: {
+      id: string;
+      data: string;
+      membrosPresentes: string[];
+      visitantes: {
+        nome: string;
+        telefone: string;
+        convidadoPor: string;
+      }[];
+    }[];
+  }
+}
