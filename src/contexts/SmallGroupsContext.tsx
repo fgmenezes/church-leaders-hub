@@ -2,6 +2,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 
+// Define the Visitor interface
+export interface Visitor {
+  id: string;
+  nome: string;
+  telefone: string;
+  convidadoPor: string;
+}
+
+// Define the Attendance interface
+export interface Attendance {
+  id: string;
+  data: string;
+  membrosPresentes: string[];
+  visitantes: Visitor[];
+}
+
 // Define the SmallGroup interface
 export interface SmallGroup {
   id: string;
@@ -22,7 +38,9 @@ export interface SmallGroup {
   membros: string[]; // Array of member IDs
   diaSemana: string;
   horario: string;
+  frequencia: string; // 'semanal', 'quinzenal', 'mensal', 'diario'
   descricao?: string;
+  chamadas?: Attendance[];
 }
 
 // Initial dummy data
@@ -46,7 +64,9 @@ const initialSmallGroups: SmallGroup[] = [
     membros: ['1', '2', '5'],
     diaSemana: 'Quarta-feira',
     horario: '19:30',
-    descricao: 'Grupo dedicado ao estudo bíblico e oração.'
+    frequencia: 'semanal',
+    descricao: 'Grupo dedicado ao estudo bíblico e oração.',
+    chamadas: []
   },
   {
     id: '2',
@@ -67,7 +87,9 @@ const initialSmallGroups: SmallGroup[] = [
     membros: ['3', '4'],
     diaSemana: 'Sexta-feira',
     horario: '20:00',
-    descricao: 'Grupo voltado para famílias e casais.'
+    frequencia: 'quinzenal',
+    descricao: 'Grupo voltado para famílias e casais.',
+    chamadas: []
   }
 ];
 
@@ -79,6 +101,7 @@ interface SmallGroupsContextType {
   addSmallGroup: (group: SmallGroup) => void;
   addMemberToGroup: (groupId: string, memberId: string) => void;
   removeMemberFromGroup: (groupId: string, memberId: string) => void;
+  addAttendance: (groupId: string, attendance: Omit<Attendance, 'id'>) => void;
 }
 
 const SmallGroupsContext = createContext<SmallGroupsContextType | undefined>(undefined);
@@ -191,6 +214,29 @@ export const SmallGroupsProvider: React.FC<{children: React.ReactNode}> = ({ chi
     });
   };
 
+  const addAttendance = (groupId: string, attendance: Omit<Attendance, 'id'>): void => {
+    const newAttendance: Attendance = {
+      ...attendance,
+      id: `att-${Date.now()}`
+    };
+    
+    setSmallGroups(currentGroups => 
+      currentGroups.map(group => {
+        if (group.id === groupId) {
+          const updatedChamadas = [...(group.chamadas || []), newAttendance];
+          return { ...group, chamadas: updatedChamadas };
+        }
+        return group;
+      })
+    );
+    
+    // Show toast notification
+    toast({
+      title: "Lista de presença registrada",
+      description: "A lista de presença foi registrada com sucesso.",
+    });
+  };
+
   return (
     <SmallGroupsContext.Provider value={{
       smallGroups,
@@ -199,7 +245,8 @@ export const SmallGroupsProvider: React.FC<{children: React.ReactNode}> = ({ chi
       deleteSmallGroup,
       addSmallGroup,
       addMemberToGroup,
-      removeMemberFromGroup
+      removeMemberFromGroup,
+      addAttendance
     }}>
       {children}
     </SmallGroupsContext.Provider>

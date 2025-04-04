@@ -10,6 +10,7 @@ import { SmallGroupForm } from '@/components/small-groups/SmallGroupForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AttendanceForm } from '@/components/small-groups/AttendanceForm';
 
 const PequenoGrupoPerfil = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +36,9 @@ const PequenoGrupoPerfil = () => {
     ? members.filter(member => smallGroup.membros.includes(member.id))
     : [];
   
+  // Get attendance records
+  const attendanceRecords = smallGroup?.chamadas || [];
+  
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -52,6 +56,8 @@ const PequenoGrupoPerfil = () => {
           <TabsList className="mb-4">
             <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
             <TabsTrigger value="membros">Membros</TabsTrigger>
+            <TabsTrigger value="chamada">Lista de Presença</TabsTrigger>
+            <TabsTrigger value="historico">Histórico de Presença</TabsTrigger>
           </TabsList>
           
           <TabsContent value="detalhes" className="space-y-4">
@@ -107,6 +113,81 @@ const PequenoGrupoPerfil = () => {
                     Gerenciar Membros
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="chamada" className="space-y-4">
+            <AttendanceForm 
+              groupId={smallGroup.id} 
+              membros={groupMembers} 
+              onSuccess={() => setActiveTab('historico')}
+            />
+          </TabsContent>
+          
+          <TabsContent value="historico" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Histórico de Presenças</CardTitle>
+                <CardDescription>
+                  Registro de presenças e visitantes em encontros passados
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {attendanceRecords.length === 0 ? (
+                  <p className="text-muted-foreground py-4">
+                    Ainda não há registros de presença para este grupo.
+                  </p>
+                ) : (
+                  <div className="space-y-6">
+                    {attendanceRecords.map((record) => (
+                      <Card key={record.id} className="border-muted">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base">Encontro em {record.data}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="mb-4">
+                            <h4 className="font-medium mb-2">Membros Presentes ({record.membrosPresentes.length})</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {record.membrosPresentes.map(membroId => {
+                                const membro = members.find(m => m.id === membroId);
+                                return (
+                                  <div key={membroId} className="text-sm">
+                                    {membro ? membro.nome : 'Membro desconhecido'}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          
+                          {record.visitantes && record.visitantes.length > 0 && (
+                            <div>
+                              <h4 className="font-medium mb-2">Visitantes ({record.visitantes.length})</h4>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Nome</TableHead>
+                                    <TableHead>Telefone</TableHead>
+                                    <TableHead>Convidado por</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {record.visitantes.map(visitante => (
+                                    <TableRow key={visitante.id}>
+                                      <TableCell>{visitante.nome}</TableCell>
+                                      <TableCell>{visitante.telefone}</TableCell>
+                                      <TableCell>{visitante.convidadoPor}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

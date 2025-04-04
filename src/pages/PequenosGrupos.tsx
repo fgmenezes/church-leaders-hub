@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Edit, Trash, Users } from 'lucide-react';
+import { PlusCircle, Edit, Trash, Users, ClipboardCheck } from 'lucide-react';
 import { useSmallGroups } from '@/contexts/SmallGroupsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMembers } from '@/contexts/MembersContext';
@@ -42,12 +42,15 @@ const PequenosGrupos = () => {
     }
   };
   
-  // Get member names for a group
-  const getMemberNames = (memberIds: string[]) => {
-    return memberIds.map(id => {
-      const member = members.find(m => m.id === id);
-      return member ? member.nome : 'Membro desconhecido';
-    }).join(', ');
+  // Format frequency for display
+  const formatFrequency = (freq: string) => {
+    const map: Record<string, string> = {
+      'diario': 'Diário',
+      'semanal': 'Semanal',
+      'quinzenal': 'Quinzenal',
+      'mensal': 'Mensal'
+    };
+    return map[freq] || freq;
   };
   
   return (
@@ -77,6 +80,7 @@ const PequenosGrupos = () => {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Responsável</TableHead>
+              <TableHead>Frequência</TableHead>
               <TableHead>Dia/Horário</TableHead>
               <TableHead>Membros</TableHead>
               <TableHead>Local</TableHead>
@@ -86,7 +90,7 @@ const PequenosGrupos = () => {
           <TableBody>
             {filteredGroups.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                   Nenhum pequeno grupo encontrado.
                 </TableCell>
               </TableRow>
@@ -99,6 +103,7 @@ const PequenosGrupos = () => {
                     </Link>
                   </TableCell>
                   <TableCell>{group.responsavel.nome}</TableCell>
+                  <TableCell>{formatFrequency(group.frequencia || 'semanal')}</TableCell>
                   <TableCell>{group.diaSemana}, {group.horario}</TableCell>
                   <TableCell>
                     {group.membros.length} membro(s)
@@ -121,6 +126,20 @@ const PequenosGrupos = () => {
                         onClick={() => navigate(`/pequenos-grupos/membros/${group.id}`)}
                       >
                         <Users className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          navigate(`/pequenos-grupos/${group.id}`);
+                          setTimeout(() => {
+                            document.querySelector('[data-value="chamada"]')?.dispatchEvent(
+                              new MouseEvent('click', { bubbles: true })
+                            );
+                          }, 100);
+                        }}
+                      >
+                        <ClipboardCheck className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"

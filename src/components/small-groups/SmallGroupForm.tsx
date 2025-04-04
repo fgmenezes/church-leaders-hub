@@ -16,8 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSmallGroups, SmallGroup } from '@/contexts/SmallGroupsContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { estados } from '@/utils/estados-brasileiros';
-import { formatPhoneNumber } from '@/utils/formatters';
+import { formatPhoneNumber, formatCep, estados } from '@/utils/formatters';
 
 const formSchema = z.object({
   nome: z.string().min(2, { message: 'Nome deve ter pelo menos 2 caracteres' }),
@@ -34,6 +33,7 @@ const formSchema = z.object({
     telefone: z.string().min(10, { message: 'Telefone deve ter no mínimo 10 dígitos' }),
     email: z.string().email({ message: 'Email inválido' }),
   }),
+  frequencia: z.string().min(1, { message: 'Frequência é obrigatória' }),
   diaSemana: z.string().min(1, { message: 'Dia da semana é obrigatório' }),
   horario: z.string().min(1, { message: 'Horário é obrigatório' }),
   descricao: z.string().optional(),
@@ -69,6 +69,7 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
         telefone: smallGroup?.responsavel?.telefone || '',
         email: smallGroup?.responsavel?.email || '',
       },
+      frequencia: smallGroup?.frequencia || '',
       diaSemana: smallGroup?.diaSemana || '',
       horario: smallGroup?.horario || '',
       descricao: smallGroup?.descricao || '',
@@ -77,7 +78,7 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
   
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     // Create or update the small group
-    if (isEditing) {
+    if (isEditing && smallGroup) {
       updateSmallGroup({
         ...smallGroup,
         ...data,
@@ -87,6 +88,7 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
         ...data,
         id: `${Date.now()}`,
         membros: [],
+        chamadas: []
       });
     }
     
@@ -110,18 +112,17 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
     onChange: (value: string) => void
   ) => {
     const value = e.target.value.replace(/\D/g, '');
-    let formattedValue = value;
-    
-    if (value.length > 5) {
-      formattedValue = value.substring(0, 5) + '-' + value.substring(5, 8);
-    }
-    
+    let formattedValue = formatCep(value);
     onChange(formattedValue);
   };
   
   const diasSemana = [
     'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
     'Quinta-feira', 'Sexta-feira', 'Sábado'
+  ];
+  
+  const frequencias = [
+    'diario', 'semanal', 'quinzenal', 'mensal'
   ];
   
   return (
@@ -144,7 +145,31 @@ export const SmallGroupForm: React.FC<SmallGroupFormProps> = ({
                 )}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="frequencia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Frequência dos Encontros</FormLabel>
+                      <FormControl>
+                        <select
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          {...field}
+                        >
+                          <option value="" disabled>Selecione a frequência</option>
+                          {frequencias.map((frequencia) => (
+                            <option key={frequencia} value={frequencia}>
+                              {frequencia.charAt(0).toUpperCase() + frequencia.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
                 <FormField
                   control={form.control}
                   name="diaSemana"
