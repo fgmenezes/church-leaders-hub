@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useSmallGroups } from '@/contexts/SmallGroupsContext';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +51,7 @@ interface SmallGroupFormProps {
 
 export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) => {
   const { addSmallGroup, updateSmallGroup } = useSmallGroups();
+  const navigate = useNavigate();
   const isEditing = !!smallGroup;
   
   // Inicializar o form com os valores do grupo sendo editado, se houver
@@ -139,10 +142,15 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
         horario: data.horario,
         descricao: data.descricao,
       });
+      
+      // Navigate back to the groups list after editing
+      if (!onSuccess) {
+        navigate('/pequenos-grupos');
+      }
     } else {
       // Criar um novo pequeno grupo com os campos obrigatórios
       const novoGrupo: SmallGroup = {
-        id: `${Date.now()}`,
+        id: `group_${Date.now()}`,
         nome: data.nome,
         endereco: {
           rua: data.endereco.rua,
@@ -165,7 +173,13 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
         chamadas: []
       };
       
-      addSmallGroup(novoGrupo);
+      // Add the new group and navigate
+      const createdGroup = addSmallGroup(novoGrupo);
+      
+      // If no success callback is provided, navigate to the groups list
+      if (!onSuccess) {
+        navigate(`/pequenos-grupos/${createdGroup.id}`);
+      }
     }
     
     // Call the success callback if provided

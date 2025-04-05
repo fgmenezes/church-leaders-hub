@@ -45,12 +45,21 @@ const PequenosGrupos = () => {
   // Format frequency for display
   const formatFrequency = (freq: string) => {
     const map: Record<string, string> = {
-      'diario': 'Diário',
+      'diaria': 'Diário',
       'semanal': 'Semanal',
       'quinzenal': 'Quinzenal',
       'mensal': 'Mensal'
     };
     return map[freq] || freq;
+  };
+  
+  // Handle form success (redirect to the group page or refresh)
+  const handleFormSuccess = () => {
+    setShowAddSheet(false);
+    // Force refresh to show the new group
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
   
   return (
@@ -179,12 +188,12 @@ const PequenosGrupos = () => {
       
       {/* Add Small Group Sheet */}
       <Sheet open={showAddSheet} onOpenChange={setShowAddSheet}>
-        <SheetContent className="sm:max-w-xl">
+        <SheetContent className="sm:max-w-xl overflow-y-auto h-full">
           <SheetHeader>
             <SheetTitle>Adicionar Pequeno Grupo</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <SmallGroupForm onSuccess={() => setShowAddSheet(false)} />
+            <SmallGroupForm onSuccess={handleFormSuccess} />
           </div>
         </SheetContent>
       </Sheet>

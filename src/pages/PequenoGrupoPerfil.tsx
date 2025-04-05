@@ -38,6 +38,10 @@ const PequenoGrupoPerfil = () => {
   // Get attendance records
   const attendanceRecords = smallGroup?.chamadas || [];
   
+  const handleFormSuccess = () => {
+    navigate('/pequenos-grupos');
+  };
+  
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -60,7 +64,7 @@ const PequenoGrupoPerfil = () => {
           </TabsList>
           
           <TabsContent value="detalhes" className="space-y-4">
-            <SmallGroupForm smallGroup={smallGroup} onSuccess={() => navigate('/pequenos-grupos')} />
+            <SmallGroupForm smallGroup={smallGroup} onSuccess={handleFormSuccess} />
           </TabsContent>
           
           <TabsContent value="membros" className="space-y-4">
@@ -192,7 +196,7 @@ const PequenoGrupoPerfil = () => {
           </TabsContent>
         </Tabs>
       ) : (
-        <SmallGroupForm onSuccess={() => navigate('/pequenos-grupos')} />
+        <SmallGroupForm onSuccess={handleFormSuccess} />
       )}
     </div>
   );

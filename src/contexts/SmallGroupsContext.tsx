@@ -83,11 +83,20 @@ export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Adicionar novo grupo
   const addSmallGroup = (group: SmallGroup) => {
-    setSmallGroups(prev => [...prev, group]);
+    // Ensure the group has a unique ID
+    const newGroup = {
+      ...group,
+      id: group.id || `group_${Date.now()}`
+    };
+    
+    setSmallGroups(prev => [...prev, newGroup]);
+    
     toast({
       title: "Grupo criado",
-      description: `${group.nome} foi criado com sucesso.`,
+      description: `${newGroup.nome} foi criado com sucesso.`,
     });
+    
+    return newGroup;
   };
 
   // Atualizar grupo existente
@@ -97,6 +106,7 @@ export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         group.id === updatedGroup.id ? updatedGroup : group
       )
     );
+    
     toast({
       title: "Grupo atualizado",
       description: `${updatedGroup.nome} foi atualizado com sucesso.`,
