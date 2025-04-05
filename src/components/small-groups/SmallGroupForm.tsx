@@ -395,12 +395,12 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
                           </FormControl>
                           <SelectContent>
                             {estadosBrasileiros.map((estado) => (
-                              <SelectOption 
+                              <SelectItem 
                                 key={estado.value} 
                                 value={estado.value}
                               >
                                 {estado.label}
-                              </SelectOption>
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
