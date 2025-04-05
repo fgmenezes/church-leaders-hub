@@ -22,6 +22,7 @@ interface Visitor {
   nome: string;
   telefone: string;
   convidadoPor: string;
+  id?: string;
 }
 
 interface AttendanceRecord {
@@ -50,6 +51,7 @@ interface SmallGroupsContextType {
   updateSmallGroup: (updatedGroup: SmallGroup) => void;
   deleteSmallGroup: (id: string) => void;
   getSmallGroupById: (id: string) => SmallGroup | undefined;
+  getSmallGroup: (id: string) => SmallGroup | undefined;
   addMemberToGroup: (groupId: string, memberId: string) => void;
   removeMemberFromGroup: (groupId: string, memberId: string) => void;
   registerAttendance: (groupId: string, attendance: AttendanceRecord) => void;
@@ -113,8 +115,13 @@ export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
-  // Buscar grupo por ID
+  // Buscar grupo por ID (método duplicado para compatibilidade)
   const getSmallGroupById = (id: string) => {
+    return smallGroups.find(group => group.id === id);
+  };
+  
+  // Método alternativo para buscar grupo por ID
+  const getSmallGroup = (id: string) => {
     return smallGroups.find(group => group.id === id);
   };
 
@@ -161,6 +168,7 @@ export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       updateSmallGroup,
       deleteSmallGroup,
       getSmallGroupById,
+      getSmallGroup,
       addMemberToGroup,
       removeMemberFromGroup,
       registerAttendance,
@@ -207,6 +215,7 @@ declare global {
       data: string;
       membrosPresentes: string[];
       visitantes: {
+        id?: string;
         nome: string;
         telefone: string;
         convidadoPor: string;

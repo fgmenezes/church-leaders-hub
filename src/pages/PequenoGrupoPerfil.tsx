@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -119,8 +118,8 @@ const PequenoGrupoPerfil = () => {
           
           <TabsContent value="chamada" className="space-y-4">
             <AttendanceForm 
-              groupId={smallGroup.id} 
-              membros={groupMembers} 
+              smallGroupId={smallGroup.id} 
+              groupMembers={groupMembers} 
               onSuccess={() => setActiveTab('historico')}
             />
           </TabsContent>
