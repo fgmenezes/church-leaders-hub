@@ -12,7 +12,8 @@ import {
   ChevronRight, 
   Menu,
   UserPlus,
-  LogOut
+  LogOut,
+  UsersRound
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -56,6 +57,7 @@ export function AppSidebar() {
   const routes = [
     { icon: Home, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Membros', path: '/membros' },
+    { icon: UsersRound, label: 'Pequenos Grupos', path: '/pequenos-grupos' },
     { icon: Calendar, label: 'Eventos', path: '/eventos' },
     { icon: ListTodo, label: 'Agendas', path: '/agendas' },
     { icon: UserPlus, label: 'Auto Indicação', path: '/auto-indicacao' },
