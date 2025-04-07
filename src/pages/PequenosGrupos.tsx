@@ -7,10 +7,9 @@ import { PlusCircle, Edit, Trash, Users, ClipboardCheck } from 'lucide-react';
 import { useSmallGroups } from '@/contexts/SmallGroupsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMembers } from '@/contexts/MembersContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SmallGroupForm } from '@/components/small-groups/SmallGroupForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const PequenosGrupos = () => {
   const { smallGroups, deleteSmallGroup } = useSmallGroups();
@@ -20,7 +19,7 @@ const PequenosGrupos = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   
   // Filter small groups based on search term
   const filteredGroups = smallGroups.filter(group =>
@@ -55,11 +54,8 @@ const PequenosGrupos = () => {
   
   // Handle form success (redirect to the group page or refresh)
   const handleFormSuccess = () => {
-    setShowAddSheet(false);
-    // Force refresh to show the new group
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
+    setShowAddDialog(false);
+    // No need to reload the page, just close the dialog
   };
   
   return (
@@ -68,7 +64,7 @@ const PequenosGrupos = () => {
         title="Pequenos Grupos" 
         description="Gerencie os pequenos grupos do ministério"
       >
-        <Button onClick={() => setShowAddSheet(true)}>
+        <Button onClick={() => setShowAddDialog(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Novo Pequeno Grupo
         </Button>
@@ -171,32 +167,32 @@ const PequenosGrupos = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
+            <div className="mt-4">
               Tem certeza que deseja excluir este pequeno grupo? Esta ação não pode ser desfeita.
-            </DialogDescription>
+            </div>
           </DialogHeader>
-          <DialogFooter>
+          <div className="flex justify-end gap-2 mt-6">
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancelar
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
               Excluir
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
       
-      {/* Add Small Group Sheet */}
-      <Sheet open={showAddSheet} onOpenChange={setShowAddSheet}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto h-full">
-          <SheetHeader>
-            <SheetTitle>Adicionar Pequeno Grupo</SheetTitle>
-          </SheetHeader>
+      {/* Add Small Group Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="w-[80vw] max-w-[1000px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Adicionar Pequeno Grupo</DialogTitle>
+          </DialogHeader>
           <div className="mt-6">
             <SmallGroupForm onSuccess={handleFormSuccess} />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

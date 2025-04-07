@@ -2,65 +2,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-// Definição dos tipos
-interface SmallGroupAddress {
-  rua: string;
-  numero: string;
-  cep: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-}
-
-interface SmallGroupResponsible {
-  nome: string;
-  telefone: string;
-  email?: string;
-}
-
-interface Visitor {
-  nome: string;
-  telefone: string;
-  convidadoPor: string;
-  id?: string;
-}
-
-interface AttendanceRecord {
-  id: string;
-  data: string;
-  membrosPresentes: string[];
-  visitantes: Visitor[];
-}
-
-interface SmallGroup {
-  id: string;
-  nome: string;
-  descricao?: string;
-  endereco: SmallGroupAddress;
-  responsavel: SmallGroupResponsible;
-  frequencia: 'diaria' | 'semanal' | 'quinzenal' | 'mensal';
-  diaSemana?: 'domingo' | 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado';
-  horario?: string;
-  membros: string[];
-  chamadas: AttendanceRecord[];
-}
-
-interface SmallGroupsContextType {
-  smallGroups: SmallGroup[];
-  addSmallGroup: (group: SmallGroup) => SmallGroup; // Updated return type here
-  updateSmallGroup: (updatedGroup: SmallGroup) => void;
-  deleteSmallGroup: (id: string) => void;
-  getSmallGroupById: (id: string) => SmallGroup | undefined;
-  getSmallGroup: (id: string) => SmallGroup | undefined;
-  addMemberToGroup: (groupId: string, memberId: string) => void;
-  removeMemberFromGroup: (groupId: string, memberId: string) => void;
-  registerAttendance: (groupId: string, attendance: AttendanceRecord) => void;
-}
-
-// Criação do contexto
-const SmallGroupsContext = createContext<SmallGroupsContextType | undefined>(undefined);
+// Types moved to separate file for better organization
+import { 
+  SmallGroup, 
+  SmallGroupAddress, 
+  SmallGroupResponsible, 
+  Visitor, 
+  AttendanceRecord,
+  SmallGroupsContextType 
+} from '@/types/small-groups';
 
 // Provider
+const SmallGroupsContext = createContext<SmallGroupsContextType | undefined>(undefined);
+
 export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
   const [smallGroups, setSmallGroups] = useState<SmallGroup[]>(() => {
@@ -82,7 +36,7 @@ export const SmallGroupsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [smallGroups]);
 
   // Adicionar novo grupo
-  const addSmallGroup = (group: SmallGroup) => {
+  const addSmallGroup = (group: SmallGroup): SmallGroup => {
     // Ensure the group has a unique ID
     const newGroup = {
       ...group,
@@ -196,40 +150,3 @@ export const useSmallGroups = () => {
   }
   return context;
 };
-
-// Adicionar tipos globais
-declare global {
-  interface SmallGroup {
-    id: string;
-    nome: string;
-    descricao?: string;
-    endereco: {
-      rua: string;
-      numero: string;
-      cep: string;
-      bairro: string;
-      cidade: string;
-      estado: string;
-    };
-    responsavel: {
-      nome: string;
-      telefone: string;
-      email?: string;
-    };
-    frequencia: 'diaria' | 'semanal' | 'quinzenal' | 'mensal';
-    diaSemana?: 'domingo' | 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado';
-    horario?: string;
-    membros: string[];
-    chamadas: {
-      id: string;
-      data: string;
-      membrosPresentes: string[];
-      visitantes: {
-        id?: string;
-        nome: string;
-        telefone: string;
-        convidadoPor: string;
-      }[];
-    }[];
-  }
-}

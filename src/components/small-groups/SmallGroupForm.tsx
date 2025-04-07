@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useSmallGroups } from '@/contexts/SmallGroupsContext';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -21,6 +20,11 @@ import { estadosBrasileiros } from '@/utils/estados-brasileiros';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { formatPhoneNumber } from '@/utils/formatters';
+import { GroupBasicInfo } from './form-sections/GroupBasicInfo';
+import { GroupSchedule } from './form-sections/GroupSchedule';
+import { GroupAddress } from './form-sections/GroupAddress';
+import { GroupResponsible } from './form-sections/GroupResponsible';
+import { SmallGroup } from '@/types/small-groups';
 
 // Schema para validação do formulário
 const formSchema = z.object({
@@ -143,7 +147,7 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
         descricao: data.descricao,
       });
       
-      // Navigate back to the groups list after editing
+      // Navigate back to the groups list after editing if no success callback
       if (!onSuccess) {
         navigate('/pequenos-grupos');
       }
@@ -189,251 +193,133 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
   };
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isEditing ? 'Editar Pequeno Grupo' : 'Novo Pequeno Grupo'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome do Pequeno Grupo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nome do grupo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="descricao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Descreva brevemente o objetivo ou foco deste grupo"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="bg-muted/50 p-4 rounded-md space-y-4">
+              <h3 className="font-medium">Encontros</h3>
+              
               <FormField
                 control={form.control}
-                name="nome"
+                name="frequencia"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome do Pequeno Grupo</FormLabel>
+                  <FormItem className="space-y-1">
+                    <FormLabel>Frequência</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome do grupo" {...field} />
+                      <RadioGroup 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        className="flex flex-wrap gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="diaria" id="diaria" />
+                          <FormLabel htmlFor="diaria" className="font-normal">Diária</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="semanal" id="semanal" />
+                          <FormLabel htmlFor="semanal" className="font-normal">Semanal</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="quinzenal" id="quinzenal" />
+                          <FormLabel htmlFor="quinzenal" className="font-normal">Quinzenal</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="mensal" id="mensal" />
+                          <FormLabel htmlFor="mensal" className="font-normal">Mensal</FormLabel>
+                        </div>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="descricao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Descreva brevemente o objetivo ou foco deste grupo"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="bg-muted/50 p-4 rounded-md space-y-4">
-                <h3 className="font-medium">Encontros</h3>
-                
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="frequencia"
+                  name="diaSemana"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Frequência</FormLabel>
-                      <FormControl>
-                        <RadioGroup 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          className="flex flex-wrap gap-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="diaria" id="diaria" />
-                            <FormLabel htmlFor="diaria" className="font-normal">Diária</FormLabel>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="semanal" id="semanal" />
-                            <FormLabel htmlFor="semanal" className="font-normal">Semanal</FormLabel>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="quinzenal" id="quinzenal" />
-                            <FormLabel htmlFor="quinzenal" className="font-normal">Quinzenal</FormLabel>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="mensal" id="mensal" />
-                            <FormLabel htmlFor="mensal" className="font-normal">Mensal</FormLabel>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
+                    <FormItem>
+                      <FormLabel>Dia da Semana</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o dia" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="domingo">Domingo</SelectItem>
+                          <SelectItem value="segunda">Segunda-feira</SelectItem>
+                          <SelectItem value="terca">Terça-feira</SelectItem>
+                          <SelectItem value="quarta">Quarta-feira</SelectItem>
+                          <SelectItem value="quinta">Quinta-feira</SelectItem>
+                          <SelectItem value="sexta">Sexta-feira</SelectItem>
+                          <SelectItem value="sabado">Sábado</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="diaSemana"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Dia da Semana</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o dia" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="domingo">Domingo</SelectItem>
-                            <SelectItem value="segunda">Segunda-feira</SelectItem>
-                            <SelectItem value="terca">Terça-feira</SelectItem>
-                            <SelectItem value="quarta">Quarta-feira</SelectItem>
-                            <SelectItem value="quinta">Quinta-feira</SelectItem>
-                            <SelectItem value="sexta">Sexta-feira</SelectItem>
-                            <SelectItem value="sabado">Sábado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="horario"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Horário</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              <div className="bg-muted/50 p-4 rounded-md space-y-4">
-                <h3 className="font-medium">Endereço</h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="endereco.rua"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Rua</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="endereco.numero"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Número</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="endereco.cep"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CEP</FormLabel>
-                        <FormControl>
-                          <Input 
-                            value={field.value}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              formatarCEP(e);
-                            }}
-                            maxLength={9}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="endereco.bairro"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bairro</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="endereco.cidade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="endereco.estado"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o estado" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {estadosBrasileiros.map((estado) => (
-                              <SelectItem 
-                                key={estado.value} 
-                                value={estado.value}
-                              >
-                                {estado.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              
-              <div className="bg-muted/50 p-4 rounded-md space-y-4">
-                <h3 className="font-medium">Responsável pelo Local</h3>
-                
                 <FormField
                   control={form.control}
-                  name="responsavel.nome"
+                  name="horario"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome</FormLabel>
+                      <FormLabel>Horário</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            
+            <div className="bg-muted/50 p-4 rounded-md space-y-4">
+              <h3 className="font-medium">Endereço</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="endereco.rua"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rua</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -442,53 +328,166 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
                   )}
                 />
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="responsavel.telefone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="endereco.numero"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="endereco.cep"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            formatarCEP(e);
+                          }}
+                          maxLength={9}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="endereco.bairro"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="endereco.cidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="endereco.estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Input 
-                            value={field.value}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              formatarTelefone(e);
-                            }}
-                            maxLength={15}
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o estado" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="responsavel.email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email (opcional)</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          {estadosBrasileiros.map((estado) => (
+                            <SelectItem 
+                              key={estado.value} 
+                              value={estado.value}
+                            >
+                              {estado.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
             
-            <CardFooter className="px-0 pb-0">
-              <Button type="submit">
-                {isEditing ? 'Salvar Alterações' : 'Criar Pequeno Grupo'}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            <div className="bg-muted/50 p-4 rounded-md space-y-4">
+              <h3 className="font-medium">Responsável pelo Local</h3>
+              
+              <FormField
+                control={form.control}
+                name="responsavel.nome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="responsavel.telefone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            formatarTelefone(e);
+                          }}
+                          maxLength={15}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="responsavel.email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email (opcional)</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button type="submit">
+              {isEditing ? 'Salvar Alterações' : 'Criar Pequeno Grupo'}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
