@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { UserAvatar } from './UserAvatar';
 
 export function MainLayout() {
   const isMobile = useIsMobile();
@@ -14,8 +15,11 @@ export function MainLayout() {
       <main className={cn(
         "flex-1 transition-all duration-300 ease-in-out",
         isMobile ? "px-4" : "px-8",
-        "py-6"
+        "py-6 relative"
       )}>
+        <div className="absolute top-6 right-8 z-10">
+          <UserAvatar />
+        </div>
         <div className="container max-w-7xl mx-auto">
           <Outlet />
         </div>

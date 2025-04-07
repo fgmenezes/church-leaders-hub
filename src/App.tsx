@@ -16,6 +16,7 @@ import PequenoGrupoPerfil from "./pages/PequenoGrupoPerfil";
 import PequenoGrupoMembros from "./pages/PequenoGrupoMembros";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import UserProfile from "./pages/UserProfile";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { MembersProvider } from "./contexts/MembersContext";
@@ -82,6 +83,7 @@ const App = () => {
                       <Route path="/eventos" element={<Eventos />} />
                       <Route path="/agendas" element={<Agendas />} />
                       <Route path="/auto-indicacao" element={<AutoIndicacao />} />
+                      <Route path="/perfil" element={<UserProfile />} />
                       
                       {/* Rotas para Pequenos Grupos */}
                       <Route path="/pequenos-grupos" element={<PequenosGrupos />} />
