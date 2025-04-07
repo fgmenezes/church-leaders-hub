@@ -122,7 +122,7 @@ export function AppSidebar() {
           isCollapsed && "justify-center"
         )}>
           <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground">
-            {user?.name.charAt(0) || 'L'}
+            {user?.name.charAt(0) || ''}
           </div>
           {!isCollapsed && (
             <div className="animate-fade-in flex-1">
