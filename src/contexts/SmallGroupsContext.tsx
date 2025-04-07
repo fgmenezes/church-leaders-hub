@@ -47,7 +47,7 @@ interface SmallGroup {
 
 interface SmallGroupsContextType {
   smallGroups: SmallGroup[];
-  addSmallGroup: (group: SmallGroup) => void;
+  addSmallGroup: (group: SmallGroup) => SmallGroup; // Updated return type here
   updateSmallGroup: (updatedGroup: SmallGroup) => void;
   deleteSmallGroup: (id: string) => void;
   getSmallGroupById: (id: string) => SmallGroup | undefined;
