@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -7,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 210 40% 94%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -48,7 +47,7 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222 47% 7%;
     --foreground: 210 40% 98%;
 
     --card: 217 33% 18%;
@@ -94,18 +93,15 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Estilização personalizada para elementos genéricos */
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold tracking-tight;
   }
 
-  /* Animações para todas as transições */
   *, *::before, *::after {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-/* Componentes personalizados */
 @layer components {
   .glass-panel {
     @apply bg-white/80 dark:bg-black/30 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg;
