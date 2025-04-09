@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (email === TEST_EMAIL && password === TEST_PASSWORD) {
       const mockUser = {
         id: '1',
-        name: 'Líder do Ministério',
-        role: 'leader',
+        name: 'Administrador',
+        role: 'admin',
       };
       
       setUser(mockUser);

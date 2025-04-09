@@ -39,7 +39,7 @@ export default function UserProfile() {
                 </AvatarFallback>
               </Avatar>
               <CardTitle className="mt-4">{user?.name || "Usuário"}</CardTitle>
-              <CardDescription>{user?.role === 'leader' ? 'Líder de Ministério' : 'Usuário'}</CardDescription>
+              <CardDescription>{user?.role === 'admin' ? 'Administrador' : 'Usuário'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -73,11 +73,11 @@ export default function UserProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
-                      <p>{user?.name || "Líder do Ministério"}</p>
+                      <p>{user?.name || "Usuário"}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Função</p>
-                      <p>{user?.role === 'leader' ? 'Líder de Ministério' : 'Usuário'}</p>
+                      <p>{user?.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Telefone</p>

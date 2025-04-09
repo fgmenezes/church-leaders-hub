@@ -1,89 +1,96 @@
 
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
+const formSchema = z.object({
+  email: z.string().email({
+    message: "Por favor, digite um email válido.",
+  }),
+  password: z.string().min(6, {
+    message: "A senha deve ter pelo menos 6 caracteres.",
+  }),
+});
+
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const navigate = useNavigate();
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await login(email, password);
-      toast({
-        title: 'Login realizado com sucesso',
-        description: 'Bem-vindo de volta!',
-      });
+      await login(values.email, values.password);
     } catch (error) {
       toast({
-        variant: 'destructive',
-        title: 'Erro ao fazer login',
-        description: 'Verifique suas credenciais e tente novamente.',
+        variant: "destructive",
+        title: "Erro de autenticação",
+        description: "Email ou senha inválidos.",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
-
+  }
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="h-screen flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Ministérios</CardTitle>
+          <CardTitle className="text-2xl font-bold">Sistema de Gestão</CardTitle>
           <CardDescription>
-            Faça login para acessar o sistema de gestão de ministérios
+            Faça login para acessar o sistema de gestão
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="exemplo@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="******"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="******" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? 'Entrando...' : 'Entrar'}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Este sistema é reservado para líderes de ministérios
-          </p>
-        </CardFooter>
-        <CardFooter className="flex justify-center">
-          <p className="text-xs text-muted-foreground">
-            Use: admin@igreja.com / ministerio123
+            Este sistema é reservado para administradores
           </p>
         </CardFooter>
       </Card>
