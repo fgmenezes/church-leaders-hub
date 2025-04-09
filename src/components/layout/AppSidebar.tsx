@@ -57,6 +57,7 @@ export function AppSidebar() {
     { icon: Home, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Membros', path: '/membros' },
     { icon: UsersRound, label: 'Pequenos Grupos', path: '/pequenos-grupos' },
+    { icon: Users, label: 'Líderes', path: '/lideres' },
     { icon: Calendar, label: 'Eventos', path: '/eventos' },
     { icon: ListTodo, label: 'Agendas', path: '/agendas' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },

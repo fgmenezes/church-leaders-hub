@@ -8,6 +8,8 @@ import { MainLayout } from "./components/layout/MainLayout";
 import Dashboard from "./pages/Index";
 import Membros from "./pages/Membros";
 import MembroPerfil from "./pages/MembroPerfil";
+import Lideres from "./pages/Lideres";
+import LiderPerfil from "./pages/LiderPerfil";
 import Eventos from "./pages/Eventos";
 import Agendas from "./pages/Agendas";
 import Relatorios from "./pages/Relatorios";
@@ -82,6 +84,9 @@ const App = () => {
                       <Route path="/membros/:id" element={<MembroPerfil />} />
                       <Route path="/membros/editar/:id" element={<MembroPerfil />} />
                       <Route path="/membros/novo" element={<MembroPerfil />} />
+                      <Route path="/lideres" element={<Lideres />} />
+                      <Route path="/lideres/:id" element={<LiderPerfil />} />
+                      <Route path="/lideres/novo" element={<LiderPerfil />} />
                       <Route path="/eventos" element={<Eventos />} />
                       <Route path="/agendas" element={<Agendas />} />
                       <Route path="/relatorios" element={<Relatorios />} />
