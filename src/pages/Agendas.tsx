@@ -76,7 +76,7 @@ const Agendas = () => {
     <div className="animate-fade-in">
       <PageHeader 
         title="Agendas" 
-        description="Gerencie a agenda do seu ministério"
+        description="Gerencie as agendas da sua organização"
       >
         <Button onClick={handleAddAgenda}>
           <Plus className="mr-2 h-4 w-4" />

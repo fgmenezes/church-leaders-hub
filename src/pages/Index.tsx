@@ -48,7 +48,7 @@ const Dashboard = () => {
     {
       id: '1',
       title: 'Novo membro adicionado',
-      description: 'Pedro Silva foi adicionado ao ministério de louvor',
+      description: 'Pedro Silva foi adicionado à organização',
       time: '10 minutos atrás',
       type: 'success' as const,
     },
@@ -100,7 +100,7 @@ const Dashboard = () => {
     <div className="animate-fade-in">
       <PageHeader 
         title="Dashboard" 
-        description="Visão geral do seu ministério"
+        description="Visão geral da sua organização"
       >
         <Button>Nova Atividade</Button>
       </PageHeader>

@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Credenciais de teste
 const TEST_EMAIL = "admin@igreja.com";
-const TEST_PASSWORD = "ministerio123";
+const TEST_PASSWORD = "admin123";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

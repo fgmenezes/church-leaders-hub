@@ -62,7 +62,7 @@ const PequenosGrupos = () => {
     <div className="animate-fade-in">
       <PageHeader 
         title="Pequenos Grupos" 
-        description="Gerencie os pequenos grupos do ministério"
+        description="Gerencie os pequenos grupos da sua organização"
       >
         <Button onClick={() => setShowAddDialog(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />

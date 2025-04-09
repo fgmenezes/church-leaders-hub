@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 
@@ -68,7 +69,7 @@ const initialMembers: Membro[] = [
     },
     batizado: true,
     habilidades: ['Canto', 'Violão', 'Piano'],
-    observacoes: 'Participa do ministério aos domingos e quartas-feiras.',
+    observacoes: 'Participa dos cultos aos domingos e quartas-feiras.',
     listaObservacoes: [
       {
         id: '1',
@@ -98,7 +99,7 @@ const initialMembers: Membro[] = [
     },
     batizado: true,
     habilidades: ['Teclado', 'Arranjos'],
-    observacoes: 'Responsável pelos arranjos do ministério.'
+    observacoes: 'Responsável pelos arranjos musicais.'
   },
   { 
     id: '3', 

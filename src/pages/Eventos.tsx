@@ -93,7 +93,7 @@ const Eventos = () => {
     <div className="animate-fade-in">
       <PageHeader 
         title="Eventos" 
-        description="Gerencie os eventos do seu ministério"
+        description="Gerencie os eventos da sua organização"
       >
         <Button onClick={handleAddEvento}>
           <CalendarPlus className="mr-2 h-4 w-4" />

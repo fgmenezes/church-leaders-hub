@@ -152,7 +152,7 @@ const Membros = () => {
     <div className="animate-fade-in">
       <PageHeader 
         title="Membros" 
-        description="Gerencie os membros do seu ministério"
+        description="Gerencie os membros da sua organização"
         badge={`${members.length} membros`}
       >
         <Button onClick={handleAddMembro}>

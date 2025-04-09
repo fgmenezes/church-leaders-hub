@@ -314,7 +314,7 @@ const MemberForm: React.FC<MemberFormProps> = ({ defaultValues, isEditing, onSub
                 name="funcao"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Função no Ministério*</FormLabel>
+                    <FormLabel>Função na Organização*</FormLabel>
                     <FormControl>
                       <Input placeholder="Ex: Vocal, Guitarrista, Pastor..." {...field} />
                     </FormControl>
