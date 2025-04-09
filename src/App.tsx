@@ -10,6 +10,8 @@ import Membros from "./pages/Membros";
 import MembroPerfil from "./pages/MembroPerfil";
 import Eventos from "./pages/Eventos";
 import Agendas from "./pages/Agendas";
+import Relatorios from "./pages/Relatorios";
+import Configuracoes from "./pages/Configuracoes";
 // Importação removida de Auto-Indicação
 import PequenosGrupos from "./pages/PequenosGrupos";
 import PequenoGrupoPerfil from "./pages/PequenoGrupoPerfil";
@@ -82,6 +84,8 @@ const App = () => {
                       <Route path="/membros/novo" element={<MembroPerfil />} />
                       <Route path="/eventos" element={<Eventos />} />
                       <Route path="/agendas" element={<Agendas />} />
+                      <Route path="/relatorios" element={<Relatorios />} />
+                      <Route path="/configuracoes" element={<Configuracoes />} />
                       {/* Rota de Auto-Indicação removida */}
                       <Route path="/perfil" element={<UserProfile />} />
                       
