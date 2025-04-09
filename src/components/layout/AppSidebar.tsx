@@ -11,7 +11,6 @@ import {
   BarChart3, 
   ChevronRight, 
   Menu,
-  UserPlus,
   LogOut,
   UsersRound
 } from 'lucide-react';
@@ -60,7 +59,6 @@ export function AppSidebar() {
     { icon: UsersRound, label: 'Pequenos Grupos', path: '/pequenos-grupos' },
     { icon: Calendar, label: 'Eventos', path: '/eventos' },
     { icon: ListTodo, label: 'Agendas', path: '/agendas' },
-    { icon: UserPlus, label: 'Auto Indicação', path: '/auto-indicacao' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: Settings, label: 'Configurações', path: '/configuracoes' },
   ];
@@ -78,7 +76,7 @@ export function AppSidebar() {
       <div className="px-3 py-4 flex items-center justify-between border-b border-sidebar-border">
         {!isCollapsed && (
           <h1 className="text-sidebar-foreground text-lg font-semibold">
-            Ministérios
+            Menu
           </h1>
         )}
         {!isMobile && (
@@ -126,8 +124,7 @@ export function AppSidebar() {
           </div>
           {!isCollapsed && (
             <div className="animate-fade-in flex-1">
-              <p className="text-sidebar-foreground text-sm font-medium">{user?.name || 'Líder'}</p>
-              <p className="text-sidebar-foreground/70 text-xs">Ministério</p>
+              <p className="text-sidebar-foreground text-sm font-medium">{user?.name || ''}</p>
             </div>
           )}
           <Button
