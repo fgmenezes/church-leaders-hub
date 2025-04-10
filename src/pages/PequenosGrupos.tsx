@@ -58,6 +58,11 @@ const PequenosGrupos = () => {
     // No need to reload the page, just close the dialog
   };
   
+  // Handle navigation to small group details
+  const navigateToGroupDetails = (groupId: string) => {
+    navigate(`/pequenos-grupos/${groupId}`);
+  };
+  
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -103,9 +108,13 @@ const PequenosGrupos = () => {
               filteredGroups.map((group) => (
                 <TableRow key={group.id}>
                   <TableCell className="font-medium">
-                    <Link to={`/pequenos-grupos/${group.id}`} className="hover:underline">
+                    <Button 
+                      variant="link"
+                      className="p-0 h-auto text-left font-medium hover:underline"
+                      onClick={() => navigateToGroupDetails(group.id)}
+                    >
                       {group.nome}
-                    </Link>
+                    </Button>
                   </TableCell>
                   <TableCell>{group.responsavel.nome}</TableCell>
                   <TableCell>{formatFrequency(group.frequencia || 'semanal')}</TableCell>

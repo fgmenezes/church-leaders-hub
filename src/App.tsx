@@ -96,8 +96,8 @@ const App = () => {
                       
                       {/* Rotas para Pequenos Grupos */}
                       <Route path="/pequenos-grupos" element={<PequenosGrupos />} />
-                      <Route path="/pequenos-grupos/:id" element={<PequenoGrupoPerfil />} />
                       <Route path="/pequenos-grupos/membros/:id" element={<PequenoGrupoMembros />} />
+                      <Route path="/pequenos-grupos/:id" element={<PequenoGrupoPerfil />} />
                     </Route>
                   </Route>
                   

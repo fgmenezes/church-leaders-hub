@@ -21,7 +21,11 @@ const PequenoGrupoPerfil = () => {
   const [activeTab, setActiveTab] = useState('detalhes');
   
   // If we're not creating a new group, get the existing one
+  // Make sure to handle undefined ID case properly
   const smallGroup = !isNew && id ? getSmallGroup(id) : null;
+  
+  console.log("Small Group Profile - ID:", id);
+  console.log("Small Group Data:", smallGroup);
   
   // Redirect if group not found and not creating a new one
   useEffect(() => {
