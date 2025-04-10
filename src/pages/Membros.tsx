@@ -120,6 +120,7 @@ const Membros = () => {
   };
   
   const handleAddMembro = () => {
+    console.log("Add member button clicked");
     navigate('/membros/novo');
     toast({
       title: "Adicionar membro",
@@ -168,12 +169,31 @@ const Membros = () => {
   
   return (
     <div className="animate-fade-in">
+      <div className="mb-4">
+        <Button 
+          onClick={() => navigate('/membros/novo')}
+          className="bg-red-500 hover:bg-red-600 text-white"
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          Adicionar Novo Membro (Teste)
+        </Button>
+      </div>
       <PageHeader 
         title="Membros" 
         description="Gerencie os membros da sua organização"
         badge={`${members.length} membros`}
       >
-        <Button onClick={handleAddMembro}>
+        <Button 
+          onClick={() => {
+            console.log("Add member button clicked");
+            navigate('/membros/novo');
+            toast({
+              title: "Adicionar membro",
+              description: "Redirecionando para página de cadastro de novo membro.",
+            });
+          }}
+          className="bg-green-500 hover:bg-green-600 relative z-10"
+        >
           <UserPlus className="mr-2 h-4 w-4" />
           Adicionar Membro
         </Button>
