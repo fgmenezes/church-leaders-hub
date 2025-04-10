@@ -80,10 +80,10 @@ const App = () => {
                   <Route element={<ProtectedRoute />}>
                     <Route element={<MainLayout />}>
                       <Route path="/" element={<Dashboard />} />
-                      <Route path="/membros" element={<Membros />} />
-                      <Route path="/membros/:id" element={<MembroPerfil />} />
-                      <Route path="/membros/editar/:id" element={<MembroPerfil />} />
                       <Route path="/membros/novo" element={<MembroPerfil />} />
+                      <Route path="/membros/editar/:id" element={<MembroPerfil />} />
+                      <Route path="/membros/:id" element={<MembroPerfil />} />
+                      <Route path="/membros" element={<Membros />} />
                       <Route path="/lideres" element={<Lideres />} />
                       <Route path="/lideres/:id" element={<LiderPerfil />} />
                       <Route path="/lideres/novo" element={<LiderPerfil />} />
@@ -95,9 +95,9 @@ const App = () => {
                       <Route path="/perfil" element={<UserProfile />} />
                       
                       {/* Rotas para Pequenos Grupos */}
-                      <Route path="/pequenos-grupos" element={<PequenosGrupos />} />
                       <Route path="/pequenos-grupos/membros/:id" element={<PequenoGrupoMembros />} />
                       <Route path="/pequenos-grupos/:id" element={<PequenoGrupoPerfil />} />
+                      <Route path="/pequenos-grupos" element={<PequenosGrupos />} />
                     </Route>
                   </Route>
                   

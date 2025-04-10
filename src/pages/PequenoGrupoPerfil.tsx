@@ -26,6 +26,8 @@ const PequenoGrupoPerfil = () => {
   
   console.log("Small Group Profile - ID:", id);
   console.log("Small Group Data:", smallGroup);
+  console.log("Current path:", window.location.pathname);
+  console.log("Is new group:", isNew);
   
   // Redirect if group not found and not creating a new one
   useEffect(() => {

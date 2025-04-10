@@ -120,7 +120,7 @@ const Membros = () => {
   };
   
   const handleAddMembro = () => {
-    console.log("Add member button clicked");
+    console.log("Add member button clicked - handleAddMembro function called");
     navigate('/membros/novo');
     toast({
       title: "Adicionar membro",
@@ -130,6 +130,7 @@ const Membros = () => {
 
   // Navigation function to go to member profile
   const navigateToMemberProfile = (id: string) => {
+    console.log("Navigating to member profile:", id);
     if (id) {
       navigate(`/membros/${id}`);
     }
@@ -169,28 +170,16 @@ const Membros = () => {
   
   return (
     <div className="animate-fade-in">
-      <div className="mb-4">
-        <Button 
-          onClick={() => navigate('/membros/novo')}
-          className="bg-red-500 hover:bg-red-600 text-white"
-        >
-          <UserPlus className="mr-2 h-4 w-4" />
-          Adicionar Novo Membro (Teste)
-        </Button>
-      </div>
       <PageHeader 
         title="Membros" 
         description="Gerencie os membros da sua organização"
         badge={`${members.length} membros`}
       >
         <Button 
+          type="button"
           onClick={() => {
-            console.log("Add member button clicked");
+            console.log("Primary Add Member button clicked");
             navigate('/membros/novo');
-            toast({
-              title: "Adicionar membro",
-              description: "Redirecionando para página de cadastro de novo membro.",
-            });
           }}
           className="bg-green-500 hover:bg-green-600 relative z-10"
         >

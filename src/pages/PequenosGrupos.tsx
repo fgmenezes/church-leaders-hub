@@ -60,6 +60,7 @@ const PequenosGrupos = () => {
   
   // Handle navigation to small group details
   const navigateToGroupDetails = (groupId: string) => {
+    console.log("Navigating to small group details:", groupId);
     navigate(`/pequenos-grupos/${groupId}`);
   };
   
@@ -111,7 +112,10 @@ const PequenosGrupos = () => {
                     <Button 
                       variant="link"
                       className="p-0 h-auto text-left font-medium hover:underline"
-                      onClick={() => navigateToGroupDetails(group.id)}
+                      onClick={() => {
+                        console.log("Small group name clicked:", group.id);
+                        navigate(`/pequenos-grupos/${group.id}`);
+                      }}
                     >
                       {group.nome}
                     </Button>
