@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,24 @@ const Membros = () => {
   
   // Use members context
   const { members, deleteMember, toggleMemberStatus } = useMembers();
+  
+  // Estado para controlar a busca de membros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredMembers, setFilteredMembers] = useState(members);
+  
+  // Atualiza os membros filtrados quando a busca ou membros mudam
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredMembers(members);
+    } else {
+      const filtered = members.filter(member => 
+        member.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.telefone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.funcao.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredMembers(filtered);
+    }
+  }, [searchTerm, members]);
   
   // Estado para controlar diálogos de confirmação
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -109,7 +127,7 @@ const Membros = () => {
     });
   };
 
-  // Fixed the navigation function to properly go to member profile
+  // Navigation function to go to member profile
   const navigateToMemberProfile = (id: string) => {
     if (id) {
       navigate(`/membros/${id}`);
@@ -166,7 +184,12 @@ const Membros = () => {
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar membros..." className="pl-9" />
+              <Input 
+                placeholder="Buscar membros..." 
+                className="pl-9" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             <Button variant="outline" className="w-full md:w-auto">
               <Filter className="mr-2 h-4 w-4" />
@@ -186,7 +209,7 @@ const Membros = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {members.map((membro) => (
+                {filteredMembers.map((membro) => (
                   <TableRow key={membro.id}>
                     <TableCell 
                       className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors" 

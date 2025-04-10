@@ -69,10 +69,7 @@ const formSchema = z.object({
   email: z.string().email("Email inválido"),
   telefone: z.string().min(10, "Telefone inválido"),
   cargo: z.string().min(2, "Cargo inválido"),
-  dataEntrada: z.string(),
   dataNascimento: z.string().optional(),
-  cpf: z.string().min(11, "CPF inválido").optional(),
-  rg: z.string().optional(),
   endereco: z
     .object({
       cep: z.string().optional(),
@@ -97,10 +94,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
       email: lider.email,
       telefone: lider.telefone,
       cargo: lider.cargo,
-      dataEntrada: lider.dataEntrada,
       dataNascimento: lider.dataNascimento || "",
-      cpf: lider.cpf || "",
-      rg: lider.rg || "",
       endereco: {
         cep: lider.endereco?.cep || "",
         logradouro: lider.endereco?.logradouro || "",
@@ -144,7 +138,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
 
   // Manipular envio do formulário
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Atualizar o líder com os valores do formulário
+    // Atualizar o líder com os valores do formulário e manter os campos removidos
     const liderAtualizado = {
       ...lider,
       ...values,
@@ -220,36 +214,6 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="cpf"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF</FormLabel>
-                    <FormControl>
-                      <Input placeholder="000.000.000-00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rg"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>RG</FormLabel>
-                    <FormControl>
-                      <Input placeholder="00.000.000-0" {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -478,7 +442,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="cargo"
@@ -488,50 +452,6 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                     <FormControl>
                       <Input placeholder="Cargo do líder" {...field} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="dataEntrada"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Data de Entrada</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(new Date(field.value), "dd/MM/yyyy")
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) =>
-                            field.onChange(
-                              date ? format(date, "yyyy-MM-dd") : ""
-                            )
-                          }
-                          locale={pt}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

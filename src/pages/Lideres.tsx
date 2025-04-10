@@ -145,7 +145,12 @@ export default function Lideres() {
               ) : (
                 lideresFiltrados.map((lider) => (
                   <TableRow key={lider.id}>
-                    <TableCell className="font-medium">{lider.nome}</TableCell>
+                    <TableCell 
+                      className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors"
+                      onClick={() => editarLider(lider.id)}
+                    >
+                      {lider.nome}
+                    </TableCell>
                     <TableCell>{lider.cargo}</TableCell>
                     <TableCell>{lider.email}</TableCell>
                     <TableCell>{lider.telefone}</TableCell>

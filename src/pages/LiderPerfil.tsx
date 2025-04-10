@@ -140,6 +140,18 @@ export default function LiderPerfil() {
     // Em um caso real, salvaríamos os dados em um contexto ou API
     console.log("Salvando líder:", dadosLider);
     
+    // Simulate saving to database by updating the local state
+    if (isNewLider) {
+      // In a real app, we would use a context to update the list of leaders
+      lideresIniciais.push(dadosLider);
+    } else {
+      // Update existing leader
+      const index = lideresIniciais.findIndex(l => l.id === dadosLider.id);
+      if (index !== -1) {
+        lideresIniciais[index] = dadosLider;
+      }
+    }
+    
     toast({
       title: isNewLider ? "Líder criado" : "Líder atualizado",
       description: `O líder ${dadosLider.nome} foi ${

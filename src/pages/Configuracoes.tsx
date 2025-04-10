@@ -88,7 +88,19 @@ const Configuracoes = () => {
                       Ativar tema escuro para a plataforma
                     </p>
                   </div>
-                  <Switch id="dark-mode" />
+                  <Switch 
+                    id="dark-mode" 
+                    checked={document.documentElement.classList.contains('dark')}
+                    onCheckedChange={(checked) => {
+                      const theme = checked ? 'dark' : 'light';
+                      localStorage.setItem('theme', theme);
+                      if (checked) {
+                        document.documentElement.classList.add('dark');
+                      } else {
+                        document.documentElement.classList.remove('dark');
+                      }
+                    }}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
