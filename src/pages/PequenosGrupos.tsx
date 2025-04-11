@@ -3,13 +3,20 @@ import React, { useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Edit, Trash, Users, ClipboardCheck } from 'lucide-react';
+import { PlusCircle, Edit, Trash, Users, ClipboardCheck, Search, Filter, MoreHorizontal, Eye } from 'lucide-react';
 import { useSmallGroups } from '@/contexts/SmallGroupsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMembers } from '@/contexts/MembersContext';
 import { Input } from '@/components/ui/input';
 import { SmallGroupForm } from '@/components/small-groups/SmallGroupForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const PequenosGrupos = () => {
   const { smallGroups, deleteSmallGroup } = useSmallGroups();
@@ -76,13 +83,20 @@ const PequenosGrupos = () => {
         </Button>
       </PageHeader>
       
-      <div className="mb-6">
-        <Input
-          placeholder="Buscar pequeno grupo..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+      <div className="mb-6 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar pequeno grupo..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button variant="outline" className="w-full md:w-auto">
+          <Filter className="mr-2 h-4 w-4" />
+          Filtrar
+        </Button>
       </div>
       
       <div className="rounded-md border">
@@ -114,7 +128,7 @@ const PequenosGrupos = () => {
                       className="p-0 h-auto text-left font-medium hover:underline"
                       onClick={() => {
                         console.log("Small group name clicked:", group.id);
-                        navigate(`/pequenos-grupos/${group.id}`);
+                        navigateToGroupDetails(group.id);
                       }}
                     >
                       {group.nome}
@@ -131,41 +145,58 @@ const PequenosGrupos = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => navigate(`/pequenos-grupos/${group.id}`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => navigate(`/pequenos-grupos/membros/${group.id}`)}
-                      >
-                        <Users className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => {
-                          navigate(`/pequenos-grupos/${group.id}`);
-                          setTimeout(() => {
-                            document.querySelector('[data-value="chamada"]')?.dispatchEvent(
-                              new MouseEvent('click', { bubbles: true })
-                            );
-                          }, 100);
-                        }}
-                      >
-                        <ClipboardCheck className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDeleteClick(group.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover:bg-accent focus:bg-accent"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={() => navigateToGroupDetails(group.id)}
+                            className="cursor-pointer"
+                          >
+                            <Eye className="mr-2 h-4 w-4" /> Ver detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => navigate(`/pequenos-grupos/${group.id}`)}
+                            className="cursor-pointer"
+                          >
+                            <Edit className="mr-2 h-4 w-4" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => navigate(`/pequenos-grupos/membros/${group.id}`)}
+                            className="cursor-pointer"
+                          >
+                            <Users className="mr-2 h-4 w-4" /> Gerenciar membros
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              navigate(`/pequenos-grupos/${group.id}`);
+                              setTimeout(() => {
+                                document.querySelector('[data-value="chamada"]')?.dispatchEvent(
+                                  new MouseEvent('click', { bubbles: true })
+                                );
+                              }, 100);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <ClipboardCheck className="mr-2 h-4 w-4" /> Fazer chamada
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteClick(group.id)}
+                            className="cursor-pointer text-red-600"
+                          >
+                            <Trash className="mr-2 h-4 w-4" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>

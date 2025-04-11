@@ -15,7 +15,6 @@ interface Lider {
   email: string;
   telefone: string;
   cargo: string;
-  dataEntrada: string;
   dataNascimento?: string;
   cpf?: string;
   rg?: string;
@@ -38,7 +37,6 @@ const lideresIniciais: Lider[] = [
     email: "joao.silva@exemplo.com",
     telefone: "(11) 98765-4321",
     cargo: "Líder Principal",
-    dataEntrada: "2022-01-15",
     dataNascimento: "1985-05-20",
     cpf: "123.456.789-00",
     rg: "12.345.678-9",
@@ -58,7 +56,6 @@ const lideresIniciais: Lider[] = [
     email: "maria.oliveira@exemplo.com",
     telefone: "(11) 91234-5678",
     cargo: "Líder de Louvor",
-    dataEntrada: "2022-03-10",
     dataNascimento: "1990-07-15",
     cpf: "987.654.321-00",
     rg: "98.765.432-1",
@@ -77,7 +74,6 @@ const lideresIniciais: Lider[] = [
     email: "pedro.santos@exemplo.com",
     telefone: "(11) 99876-5432",
     cargo: "Líder de Jovens",
-    dataEntrada: "2022-05-20",
     dataNascimento: "1988-12-10",
     cpf: "456.789.123-00",
     rg: "45.678.912-3",
@@ -122,7 +118,6 @@ export default function LiderPerfil() {
         email: "",
         telefone: "",
         cargo: "",
-        dataEntrada: new Date().toISOString().split("T")[0],
         endereco: {
           cep: "",
           logradouro: "",

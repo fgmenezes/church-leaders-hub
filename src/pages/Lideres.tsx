@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { PlusCircle, Search, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Search, Edit, Trash2, Filter, MoreHorizontal, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -23,6 +23,13 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 // Tipo para os líderes
 interface Lider {
@@ -31,7 +38,6 @@ interface Lider {
   email: string;
   telefone: string;
   cargo: string;
-  dataEntrada: string;
 }
 
 // Dados de exemplo (podem ser substituídos por um contexto real posteriormente)
@@ -42,7 +48,6 @@ const lideresIniciais: Lider[] = [
     email: "joao.silva@exemplo.com",
     telefone: "(11) 98765-4321",
     cargo: "Líder Principal",
-    dataEntrada: "2022-01-15",
   },
   {
     id: "2",
@@ -50,7 +55,6 @@ const lideresIniciais: Lider[] = [
     email: "maria.oliveira@exemplo.com",
     telefone: "(11) 91234-5678",
     cargo: "Líder de Louvor",
-    dataEntrada: "2022-03-10",
   },
   {
     id: "3",
@@ -58,7 +62,6 @@ const lideresIniciais: Lider[] = [
     email: "pedro.santos@exemplo.com",
     telefone: "(11) 99876-5432",
     cargo: "Líder de Jovens",
-    dataEntrada: "2022-05-20",
   },
 ];
 
@@ -112,15 +115,21 @@ export default function Lideres() {
       <Card>
         <CardHeader>
           <CardTitle>Lista de Líderes</CardTitle>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar líderes..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex flex-col md:flex-row gap-4 mt-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Buscar líderes..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button variant="outline" className="w-full md:w-auto">
+              <Filter className="mr-2 h-4 w-4" />
+              Filtrar
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -131,7 +140,6 @@ export default function Lideres() {
                 <TableHead>Cargo</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Telefone</TableHead>
-                <TableHead>Data de Entrada</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -147,34 +155,47 @@ export default function Lideres() {
                   <TableRow key={lider.id}>
                     <TableCell 
                       className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors"
-                      onClick={() => editarLider(lider.id)}
+                      onClick={() => navigate(`/lideres/${lider.id}`)}
                     >
                       {lider.nome}
                     </TableCell>
                     <TableCell>{lider.cargo}</TableCell>
                     <TableCell>{lider.email}</TableCell>
                     <TableCell>{lider.telefone}</TableCell>
-                    <TableCell>
-                      {new Date(lider.dataEntrada).toLocaleDateString("pt-BR")}
-                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => editarLider(lider.id)}
-                        >
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => confirmarExclusao(lider)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Excluir</span>
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="hover:bg-accent focus:bg-accent"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem 
+                              onClick={() => navigate(`/lideres/${lider.id}`)}
+                              className="cursor-pointer"
+                            >
+                              <Eye className="mr-2 h-4 w-4" /> Ver detalhes
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => editarLider(lider.id)}
+                              className="cursor-pointer"
+                            >
+                              <Edit className="mr-2 h-4 w-4" /> Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => confirmarExclusao(lider)}
+                              className="cursor-pointer text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>

@@ -121,8 +121,8 @@ const Membros = () => {
   
   const handleAddMembro = () => {
     console.log("Add member button clicked - handleAddMembro function called");
-    // Force navigation directly to the new member page
-    window.location.href = '/membros/novo';
+    // Use navigate instead of window.location for proper SPA navigation
+    navigate('/membros/novo');
     
     // Show toast notification
     toast({
@@ -178,15 +178,14 @@ const Membros = () => {
         description="Gerencie os membros da sua organização"
         badge={`${members.length} membros`}
       >
-        <a href="/membros/novo" className="inline-block">
-          <Button 
-            type="button"
-            className="bg-green-500 hover:bg-green-600 relative z-10 cursor-pointer"
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Adicionar Membro
-          </Button>
-        </a>
+        <Button 
+          type="button"
+          className="bg-green-500 hover:bg-green-600 relative z-10 cursor-pointer"
+          onClick={() => navigate('/membros/novo')}
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          Adicionar Membro
+        </Button>
       </PageHeader>
       
       <Card className="mb-8">
@@ -202,14 +201,13 @@ const Membros = () => {
               />
             </div>
             <div className="flex gap-2">
-              <a href="/membros/novo" className="inline-block w-full md:w-auto">
-                <Button 
-                  className="w-full bg-green-500 hover:bg-green-600"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Adicionar
-                </Button>
-              </a>
+              <Button 
+                className="w-full bg-green-500 hover:bg-green-600"
+                onClick={() => navigate('/membros/novo')}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Adicionar
+              </Button>
               <Button variant="outline" className="w-full md:w-auto">
                 <Filter className="mr-2 h-4 w-4" />
                 Filtrar

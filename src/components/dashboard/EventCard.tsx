@@ -27,7 +27,12 @@ export function EventCard({ event, className, onViewDetails }: EventCardProps) {
     <Card className={cn("overflow-hidden flex flex-col", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg font-semibold">{event.title}</CardTitle>
+          <CardTitle 
+            className="text-lg font-semibold cursor-pointer hover:text-primary hover:underline transition-colors"
+            onClick={() => onViewDetails?.(event.id)}
+          >
+            {event.title}
+          </CardTitle>
           {event.status && (
             <Badge className={cn(
               event.status === 'upcoming' && "bg-blue-500",
