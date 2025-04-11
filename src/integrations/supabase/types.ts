@@ -9,7 +9,233 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      endereco_membros: {
+        Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          created_at: string | null
+          estado: string | null
+          id: string
+          membro_id: string | null
+          numero: string | null
+          rua: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          estado?: string | null
+          id?: string
+          membro_id?: string | null
+          numero?: string | null
+          rua?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          estado?: string | null
+          id?: string
+          membro_id?: string | null
+          numero?: string | null
+          rua?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "endereco_membros_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habilidades_membros: {
+        Row: {
+          created_at: string | null
+          habilidade: string
+          id: string
+          membro_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          habilidade: string
+          id?: string
+          membro_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          habilidade?: string
+          id?: string
+          membro_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habilidades_membros_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membros: {
+        Row: {
+          batizado: boolean | null
+          created_at: string | null
+          data_ingresso: string | null
+          data_nascimento: string | null
+          email: string | null
+          funcao: string
+          id: string
+          local_nascimento: string | null
+          nome: string
+          status: string
+          telefone: string
+          updated_at: string | null
+        }
+        Insert: {
+          batizado?: boolean | null
+          created_at?: string | null
+          data_ingresso?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          funcao: string
+          id?: string
+          local_nascimento?: string | null
+          nome: string
+          status?: string
+          telefone: string
+          updated_at?: string | null
+        }
+        Update: {
+          batizado?: boolean | null
+          created_at?: string | null
+          data_ingresso?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          funcao?: string
+          id?: string
+          local_nascimento?: string | null
+          nome?: string
+          status?: string
+          telefone?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      observacoes: {
+        Row: {
+          autor: string
+          created_at: string | null
+          data: string
+          id: string
+          membro_id: string | null
+          texto: string
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          autor: string
+          created_at?: string | null
+          data: string
+          id?: string
+          membro_id?: string | null
+          texto: string
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          autor?: string
+          created_at?: string | null
+          data?: string
+          id?: string
+          membro_id?: string | null
+          texto?: string
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observacoes_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          cargo: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          nome: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          nome?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      responsaveis_membros: {
+        Row: {
+          created_at: string | null
+          id: string
+          membro_id: string | null
+          nome: string | null
+          telefone: string | null
+          tipo: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          membro_id?: string | null
+          nome?: string | null
+          telefone?: string | null
+          tipo: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          membro_id?: string | null
+          nome?: string | null
+          telefone?: string | null
+          tipo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responsaveis_membros_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

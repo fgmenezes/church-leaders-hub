@@ -121,11 +121,11 @@ export function AppSidebar() {
           isCollapsed && "justify-center"
         )}>
           <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground">
-            {user?.name.charAt(0) || ''}
+            {user?.nome?.charAt(0) || user?.email.charAt(0) || ''}
           </div>
           {!isCollapsed && (
             <div className="animate-fade-in flex-1">
-              <p className="text-sidebar-foreground text-sm font-medium">{user?.name || ''}</p>
+              <p className="text-sidebar-foreground text-sm font-medium">{user?.nome || user?.email || ''}</p>
             </div>
           )}
           <Button

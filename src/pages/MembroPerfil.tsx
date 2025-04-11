@@ -12,58 +12,85 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 const MembroPerfil = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { members, getMember, updateMember, addMember, addObservacao } = useMembers();
+  const { members, getMember, updateMember, addMember, addObservacao, isLoading } = useMembers();
+  const { user } = useAuth();
   const [member, setMember] = useState<Membro | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [pageTitle, setPageTitle] = useState('Perfil do Membro');
   const [activeTab, setActiveTab] = useState("perfil");
   const [observacaoTitulo, setObservacaoTitulo] = useState('');
   const [observacaoTexto, setObservacaoTexto] = useState('');
+  const [isLoadingMember, setIsLoadingMember] = useState(false);
 
   useEffect(() => {
     // Verificar se estamos na rota de edição ou novo membro
-    if (id === 'novo') {
-      setPageTitle('Adicionar Novo Membro');
-      setIsEditing(false);
-      setMember(null);
-    } else if (window.location.pathname.includes('/editar/')) {
-      const memberToEdit = getMember(id || '');
-      if (memberToEdit) {
-        setPageTitle('Editar Membro');
-        setIsEditing(true);
-        setMember(memberToEdit);
-      } else {
-        navigate('/membros');
-      }
-    } else {
-      // Visualização do perfil
-      const memberToView = getMember(id || '');
-      if (memberToView) {
-        setPageTitle(`Perfil: ${memberToView.nome}`);
+    const loadMember = async () => {
+      if (id === 'novo') {
+        setPageTitle('Adicionar Novo Membro');
         setIsEditing(false);
-        setMember(memberToView);
+        setMember(null);
+      } else if (window.location.pathname.includes('/editar/')) {
+        setIsLoadingMember(true);
+        try {
+          const memberToEdit = await getMember(id || '');
+          if (memberToEdit) {
+            setPageTitle('Editar Membro');
+            setIsEditing(true);
+            setMember(memberToEdit);
+          } else {
+            navigate('/membros');
+          }
+        } catch (error) {
+          console.error('Erro ao carregar membro:', error);
+          navigate('/membros');
+        } finally {
+          setIsLoadingMember(false);
+        }
       } else {
-        navigate('/membros');
+        // Visualização do perfil
+        setIsLoadingMember(true);
+        try {
+          const memberToView = await getMember(id || '');
+          if (memberToView) {
+            setPageTitle(`Perfil: ${memberToView.nome}`);
+            setIsEditing(false);
+            setMember(memberToView);
+          } else {
+            navigate('/membros');
+          }
+        } catch (error) {
+          console.error('Erro ao carregar membro:', error);
+          navigate('/membros');
+        } finally {
+          setIsLoadingMember(false);
+        }
       }
-    }
+    };
+    
+    loadMember();
   }, [id, getMember, navigate]);
 
-  const handleFormSubmit = (data: Membro) => {
-    if (isEditing || id !== 'novo') {
-      updateMember(data);
-    } else {
-      addMember(data);
+  const handleFormSubmit = async (data: Membro) => {
+    try {
+      if (isEditing || id !== 'novo') {
+        await updateMember(data);
+      } else {
+        await addMember(data);
+      }
+      
+      // Redirecionar para a lista de membros
+      navigate('/membros');
+    } catch (error) {
+      console.error('Erro ao salvar membro:', error);
     }
-    
-    // Redirecionar para a lista de membros
-    navigate('/membros');
   };
 
-  const handleObservacaoSubmit = (e: React.FormEvent) => {
+  const handleObservacaoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!member || !observacaoTitulo.trim() || !observacaoTexto.trim()) return;
@@ -71,24 +98,42 @@ const MembroPerfil = () => {
     const hoje = new Date();
     const dataFormatada = format(hoje, 'dd/MM/yyyy', { locale: ptBR });
     
-    // Add the observation
-    addObservacao(member.id, {
-      titulo: observacaoTitulo,
-      texto: observacaoTexto,
-      data: dataFormatada,
-      autor: "Usuário Atual" // This would be replaced with actual logged in user
-    });
-    
-    // Refresh the member data
-    const updatedMember = getMember(member.id);
-    if (updatedMember) {
-      setMember(updatedMember);
+    try {
+      // Add the observation
+      await addObservacao(member.id, {
+        titulo: observacaoTitulo,
+        texto: observacaoTexto,
+        data: dataFormatada,
+        autor: user?.nome || user?.email || "Usuário Atual"
+      });
+      
+      // Refresh the member data
+      const updatedMember = await getMember(member.id);
+      if (updatedMember) {
+        setMember(updatedMember);
+      }
+      
+      // Clear the form
+      setObservacaoTitulo('');
+      setObservacaoTexto('');
+    } catch (error) {
+      console.error('Erro ao adicionar observação:', error);
     }
-    
-    // Clear the form
-    setObservacaoTitulo('');
-    setObservacaoTexto('');
   };
+
+  if (isLoadingMember || isLoading) {
+    return (
+      <div className="animate-fade-in">
+        <PageHeader 
+          title="Carregando..." 
+          description="Aguarde, estamos buscando as informações do membro"
+        />
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in">

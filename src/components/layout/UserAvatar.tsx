@@ -19,15 +19,20 @@ export function UserAvatar() {
   
   // Get initials from user name
   const getInitials = () => {
-    if (!user?.name) return "U";
+    if (user?.nome) {
+      const nameParts = user.nome.split(" ");
+      if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+      
+      return (
+        nameParts[0].charAt(0).toUpperCase() + 
+        nameParts[nameParts.length - 1].charAt(0).toUpperCase()
+      );
+    }
     
-    const nameParts = user.name.split(" ");
-    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    // If no name available, use email
+    if (user?.email) return user.email.charAt(0).toUpperCase();
     
-    return (
-      nameParts[0].charAt(0).toUpperCase() + 
-      nameParts[nameParts.length - 1].charAt(0).toUpperCase()
-    );
+    return "U";
   };
 
   return (
@@ -45,7 +50,7 @@ export function UserAvatar() {
         <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="font-normal">
-          {user?.name || "Usuário"}
+          {user?.nome || user?.email || "Usuário"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/perfil")} className="cursor-pointer">

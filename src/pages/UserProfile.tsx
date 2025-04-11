@@ -11,15 +11,20 @@ export default function UserProfile() {
   
   // Get initials from user name
   const getInitials = () => {
-    if (!user?.name) return "U";
+    if (user?.nome) {
+      const nameParts = user.nome.split(" ");
+      if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+      
+      return (
+        nameParts[0].charAt(0).toUpperCase() + 
+        nameParts[nameParts.length - 1].charAt(0).toUpperCase()
+      );
+    }
     
-    const nameParts = user.name.split(" ");
-    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    // If no name available, use email
+    if (user?.email) return user.email.charAt(0).toUpperCase();
     
-    return (
-      nameParts[0].charAt(0).toUpperCase() + 
-      nameParts[nameParts.length - 1].charAt(0).toUpperCase()
-    );
+    return "U";
   };
 
   return (
@@ -38,8 +43,8 @@ export default function UserProfile() {
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
-              <CardTitle className="mt-4">{user?.name || "Usuário"}</CardTitle>
-              <CardDescription>{user?.role === 'admin' ? 'Administrador' : 'Usuário'}</CardDescription>
+              <CardTitle className="mt-4">{user?.nome || user?.email || "Usuário"}</CardTitle>
+              <CardDescription>{user?.cargo === 'admin' ? 'Administrador' : 'Usuário'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -73,11 +78,11 @@ export default function UserProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
-                      <p>{user?.name || "Usuário"}</p>
+                      <p>{user?.nome || user?.email || "Usuário"}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Função</p>
-                      <p>{user?.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
+                      <p>{user?.cargo === 'admin' ? 'Administrador' : 'Usuário'}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Telefone</p>
