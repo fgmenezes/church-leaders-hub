@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Edit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LiderForm } from "@/components/lideres/LiderForm";
 import { toast } from "@/components/ui/use-toast";
@@ -89,7 +89,11 @@ const lideresIniciais: Lider[] = [
   },
 ];
 
-export default function LiderPerfil() {
+interface LiderPerfilProps {
+  isViewMode?: boolean;
+}
+
+export default function LiderPerfil({ isViewMode = false }: LiderPerfilProps) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [lider, setLider] = useState<Lider | null>(null);
@@ -162,10 +166,12 @@ export default function LiderPerfil() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
-        title={isNewLider ? "Novo Líder" : "Editar Líder"}
+        title={isNewLider ? "Novo Líder" : isViewMode ? "Detalhes do Líder" : "Editar Líder"}
         description={
           isNewLider
             ? "Cadastre um novo líder no sistema"
+            : isViewMode
+            ? `Detalhes do líder ${lider?.nome || ""}`
             : `Editando o líder ${lider?.nome || ""}`
         }
       >
@@ -173,15 +179,23 @@ export default function LiderPerfil() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
-        <Button type="submit" form="lider-form">
-          <Save className="mr-2 h-4 w-4" />
-          Salvar
-        </Button>
+        {!isViewMode && (
+          <Button type="submit" form="lider-form">
+            <Save className="mr-2 h-4 w-4" />
+            Salvar
+          </Button>
+        )}
+        {isViewMode && (
+          <Button onClick={() => navigate(`/lideres/${id}`)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
+        )}
       </PageHeader>
 
       <Card>
         <CardContent className="pt-6">
-          {lider && <LiderForm lider={lider} onSave={handleSave} />}
+          {lider && <LiderForm lider={lider} onSave={handleSave} readOnly={isViewMode} />}
         </CardContent>
       </Card>
     </div>

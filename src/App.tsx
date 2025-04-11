@@ -86,6 +86,7 @@ const App = () => {
                       <Route path="/membros" element={<Membros />} />
                       <Route path="/lideres" element={<Lideres />} />
                       <Route path="/lideres/:id" element={<LiderPerfil />} />
+                      <Route path="/lideres/:id/detalhes" element={<LiderPerfil isViewMode={true} />} />
                       <Route path="/lideres/novo" element={<LiderPerfil />} />
                       <Route path="/eventos" element={<Eventos />} />
                       <Route path="/agendas" element={<Agendas />} />

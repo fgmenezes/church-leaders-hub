@@ -42,7 +42,6 @@ interface Lider {
   email: string;
   telefone: string;
   cargo: string;
-  dataEntrada: string;
   dataNascimento?: string;
   cpf?: string;
   rg?: string;
@@ -61,6 +60,7 @@ interface Lider {
 interface LiderFormProps {
   lider: Lider;
   onSave: (lider: Lider) => void;
+  readOnly?: boolean;
 }
 
 // Schema de validação para o formulário
@@ -83,7 +83,7 @@ const formSchema = z.object({
     .optional(),
 });
 
-export function LiderForm({ lider, onSave }: LiderFormProps) {
+export function LiderForm({ lider, onSave, readOnly = false }: LiderFormProps) {
   const [isConsultingCep, setIsConsultingCep] = useState(false);
 
   // Inicializar o formulário com os dados do líder
@@ -168,7 +168,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                   <FormItem>
                     <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome do líder" {...field} />
+                      <Input placeholder="Nome do líder" {...field} readOnly={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,6 +190,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                               "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
+                            disabled={readOnly}
                           >
                             {field.value ? (
                               format(new Date(field.value), "dd/MM/yyyy")
@@ -243,6 +244,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                         type="email"
                         placeholder="email@exemplo.com"
                         {...field}
+                        readOnly={readOnly}
                       />
                     </FormControl>
                     <FormMessage />
@@ -260,6 +262,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                       <Input
                         placeholder="(00) 00000-0000"
                         {...field}
+                        readOnly={readOnly}
                       />
                     </FormControl>
                     <FormMessage />
@@ -293,17 +296,20 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                             placeholder="00000-000"
                             {...field}
                             onChange={(e) => {
-                              field.onChange(e);
-                              if (e.target.value.length === 8) {
-                                consultarCEP(e.target.value);
+                              if (!readOnly) {
+                                field.onChange(e);
+                                if (e.target.value.length === 8) {
+                                  consultarCEP(e.target.value);
+                                }
                               }
                             }}
+                            readOnly={readOnly}
                           />
                         </FormControl>
                         <Button
                           type="button"
                           variant="outline"
-                          disabled={isConsultingCep || !field.value || field.value.length < 8}
+                          disabled={readOnly || isConsultingCep || !field.value || field.value.length < 8}
                           onClick={() => consultarCEP(field.value)}
                         >
                           {isConsultingCep ? "..." : "Buscar"}
@@ -329,6 +335,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                         <Input
                           placeholder="Rua, Avenida, etc."
                           {...field}
+                          readOnly={readOnly}
                         />
                       </FormControl>
                       <FormMessage />
@@ -346,7 +353,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                   <FormItem>
                     <FormLabel>Número</FormLabel>
                     <FormControl>
-                      <Input placeholder="Número" {...field} />
+                      <Input placeholder="Número" {...field} readOnly={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -364,6 +371,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                         <Input
                           placeholder="Apto, Bloco, etc."
                           {...field}
+                          readOnly={readOnly}
                         />
                       </FormControl>
                       <FormMessage />
@@ -381,7 +389,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                   <FormItem>
                     <FormLabel>Bairro</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bairro" {...field} />
+                      <Input placeholder="Bairro" {...field} readOnly={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -395,7 +403,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                   <FormItem>
                     <FormLabel>Cidade</FormLabel>
                     <FormControl>
-                      <Input placeholder="Cidade" {...field} />
+                      <Input placeholder="Cidade" {...field} readOnly={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -411,6 +419,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={readOnly}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -450,7 +459,7 @@ export function LiderForm({ lider, onSave }: LiderFormProps) {
                   <FormItem>
                     <FormLabel>Cargo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Cargo do líder" {...field} />
+                      <Input placeholder="Cargo do líder" {...field} readOnly={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

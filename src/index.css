@@ -7,7 +7,7 @@
 @layer base {
   :root {
     /* Light beige background */
-    --background: 40 30% 94%;
+    --background: 244 30% 97%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -17,7 +17,7 @@
     --popover-foreground: 222 47% 11%;
 
     /* Medium blue for buttons */
-    --primary: 220 70% 50%;
+    --primary: 197 76% 49%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96%;
@@ -27,7 +27,7 @@
     --muted-foreground: 215 16% 47%;
 
     /* Light green for accent */
-    --accent: 120 40% 80%;
+    --accent: 93 74% 94%;
     --accent-foreground: 220 70% 20%;
 
     --destructive: 0 84% 60%;

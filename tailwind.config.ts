@@ -62,7 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom brand colors
+				'brand-beige': '#F1F0FB', // Light beige background
+				'brand-blue': '#1EAEDB', // Medium blue for buttons
+				'brand-green': '#F2FCE2', // Soft green for highlights/accents
 			},
 			fontFamily: {
 				sans: ["Inter", "sans-serif"],

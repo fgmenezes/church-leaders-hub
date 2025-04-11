@@ -122,17 +122,11 @@ const PequenosGrupos = () => {
             ) : (
               filteredGroups.map((group) => (
                 <TableRow key={group.id}>
-                  <TableCell className="font-medium">
-                    <Button 
-                      variant="link"
-                      className="p-0 h-auto text-left font-medium hover:underline"
-                      onClick={() => {
-                        console.log("Small group name clicked:", group.id);
-                        navigateToGroupDetails(group.id);
-                      }}
-                    >
-                      {group.nome}
-                    </Button>
+                  <TableCell 
+                    className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors"
+                    onClick={() => navigateToGroupDetails(group.id)}
+                  >
+                    {group.nome}
                   </TableCell>
                   <TableCell>{group.responsavel.nome}</TableCell>
                   <TableCell>{formatFrequency(group.frequencia || 'semanal')}</TableCell>

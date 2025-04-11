@@ -7,9 +7,11 @@ import { EventCard } from '@/components/dashboard/EventCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarPlus, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Eventos = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Dados de exemplo para demonstração
   const eventos = {
@@ -76,9 +78,17 @@ const Eventos = () => {
   };
   
   const handleViewEventDetails = (id: string) => {
+    navigate(`/eventos/${id}/detalhes`);
+  };
+  
+  const handleEditEvent = (id: string) => {
+    navigate(`/eventos/${id}`);
+  };
+  
+  const handleDeleteEvent = (id: string) => {
     toast({
-      title: "Detalhes do evento",
-      description: `Os detalhes do evento ID: ${id} serão implementados em breve.`,
+      title: "Excluir evento",
+      description: `A exclusão do evento ID: ${id} será implementada em breve.`,
     });
   };
   

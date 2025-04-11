@@ -155,7 +155,7 @@ export default function Lideres() {
                   <TableRow key={lider.id}>
                     <TableCell 
                       className="font-medium cursor-pointer hover:text-primary hover:underline transition-colors"
-                      onClick={() => navigate(`/lideres/${lider.id}`)}
+                      onClick={() => navigate(`/lideres/${lider.id}/detalhes`)}
                     >
                       {lider.nome}
                     </TableCell>
