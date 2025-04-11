@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SmallGroup } from '@/types/small-groups';
 
 const PequenoGrupoMembros = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,23 +19,76 @@ const PequenoGrupoMembros = () => {
   const navigate = useNavigate();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [smallGroup, setSmallGroup] = useState(id ? getSmallGroup(id) : null);
+  const [smallGroup, setSmallGroup] = useState<SmallGroup | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Redirect if group not found
+  // Fetch small group on mount and when ID changes
   useEffect(() => {
-    if (!smallGroup) {
-      navigate('/pequenos-grupos');
-    }
-  }, [smallGroup, navigate]);
+    const fetchSmallGroup = async () => {
+      if (!id) {
+        navigate('/pequenos-grupos');
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const group = await getSmallGroup(id);
+        if (group) {
+          setSmallGroup(group);
+        } else {
+          navigate('/pequenos-grupos');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pequeno grupo:', error);
+        navigate('/pequenos-grupos');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSmallGroup();
+  }, [id, getSmallGroup, navigate]);
   
-  // Update local state when small group changes
-  useEffect(() => {
-    if (id) {
-      setSmallGroup(getSmallGroup(id));
+  // Handle member toggle
+  const handleMemberToggle = async (memberId: string, isInGroup: boolean) => {
+    if (!smallGroup) return;
+    
+    try {
+      if (isInGroup) {
+        await removeMemberFromGroup(smallGroup.id, memberId);
+      } else {
+        await addMemberToGroup(smallGroup.id, memberId);
+      }
+      
+      // Refresh group data after toggling member
+      const updatedGroup = await getSmallGroup(smallGroup.id);
+      if (updatedGroup) {
+        setSmallGroup(updatedGroup);
+      }
+    } catch (error) {
+      console.error('Erro ao alterar membro do grupo:', error);
     }
-  }, [id, getSmallGroup]);
+  };
   
-  if (!smallGroup) return null;
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="animate-fade-in">
+        <PageHeader
+          title="Carregando..."
+          description="Aguarde, estamos carregando os dados do grupo"
+        />
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Handle case where group is not found
+  if (!smallGroup) {
+    return null;
+  }
   
   // Get current group members
   const groupMemberIds = smallGroup.membros || [];
@@ -44,17 +98,8 @@ const PequenoGrupoMembros = () => {
     .filter(member => member.status === 'ativo')
     .filter(member => 
       member.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  
-  // Handle member toggle
-  const handleMemberToggle = (memberId: string, isInGroup: boolean) => {
-    if (isInGroup) {
-      removeMemberFromGroup(smallGroup.id, memberId);
-    } else {
-      addMemberToGroup(smallGroup.id, memberId);
-    }
-  };
   
   return (
     <div className="animate-fade-in">

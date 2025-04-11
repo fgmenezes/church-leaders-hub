@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AttendanceForm } from '@/components/small-groups/AttendanceForm';
+import { SmallGroup } from '@/types/small-groups';
 
 const PequenoGrupoPerfil = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,22 +20,37 @@ const PequenoGrupoPerfil = () => {
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('detalhes');
+  const [smallGroup, setSmallGroup] = useState<SmallGroup | null>(null);
+  const [isLoading, setIsLoading] = useState(!isNew);
   
-  // If we're not creating a new group, get the existing one
-  // Make sure to handle undefined ID case properly
-  const smallGroup = !isNew && id ? getSmallGroup(id) : null;
-  
-  console.log("Small Group Profile - ID:", id);
-  console.log("Small Group Data:", smallGroup);
-  console.log("Current path:", window.location.pathname);
-  console.log("Is new group:", isNew);
-  
-  // Redirect if group not found and not creating a new one
+  // Load small group when component mounts or id changes
   useEffect(() => {
-    if (!isNew && !smallGroup) {
-      navigate('/pequenos-grupos');
-    }
-  }, [isNew, smallGroup, navigate]);
+    const fetchSmallGroup = async () => {
+      if (isNew || !id) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        const group = await getSmallGroup(id);
+        
+        if (group) {
+          setSmallGroup(group);
+        } else {
+          console.error('Small group not found:', id);
+          navigate('/pequenos-grupos');
+        }
+      } catch (error) {
+        console.error('Error fetching small group:', error);
+        navigate('/pequenos-grupos');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSmallGroup();
+  }, [id, isNew, getSmallGroup, navigate]);
   
   // Get member details for this group
   const groupMembers = smallGroup 
@@ -47,6 +63,21 @@ const PequenoGrupoPerfil = () => {
   const handleFormSuccess = () => {
     navigate('/pequenos-grupos');
   };
+  
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="animate-fade-in">
+        <PageHeader
+          title="Carregando..."
+          description="Aguarde, estamos carregando os dados do grupo"
+        />
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="animate-fade-in">

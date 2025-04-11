@@ -1,4 +1,6 @@
 
+import { Json } from '@/integrations/supabase/types';
+
 // Small Group Types
 export interface SmallGroupAddress {
   rua: string;
@@ -42,14 +44,29 @@ export interface SmallGroup {
   chamadas: AttendanceRecord[];
 }
 
+// DB interface for better Supabase integration
+export interface SmallGroupDB {
+  id: string;
+  nome: string;
+  descricao?: string;
+  endereco: Json;
+  dia_semana?: string;
+  horario?: string;
+  lider_id?: string;
+  lider_auxiliar_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface SmallGroupsContextType {
   smallGroups: SmallGroup[];
-  addSmallGroup: (group: SmallGroup) => SmallGroup;
-  updateSmallGroup: (updatedGroup: SmallGroup) => void;
-  deleteSmallGroup: (id: string) => void;
-  getSmallGroupById: (id: string) => SmallGroup | undefined;
-  getSmallGroup: (id: string) => SmallGroup | undefined;
-  addMemberToGroup: (groupId: string, memberId: string) => void;
-  removeMemberFromGroup: (groupId: string, memberId: string) => void;
-  registerAttendance: (groupId: string, attendance: AttendanceRecord) => void;
+  isLoading?: boolean;
+  addSmallGroup: (group: SmallGroup) => Promise<SmallGroup>;
+  updateSmallGroup: (updatedGroup: SmallGroup) => Promise<void>;
+  deleteSmallGroup: (id: string) => Promise<void>;
+  getSmallGroupById: (id: string) => Promise<SmallGroup | undefined>;
+  getSmallGroup: (id: string) => Promise<SmallGroup | undefined>;
+  addMemberToGroup: (groupId: string, memberId: string) => Promise<void>;
+  removeMemberFromGroup: (groupId: string, memberId: string) => Promise<void>;
+  registerAttendance: (groupId: string, attendance: AttendanceRecord) => Promise<void>;
 }
