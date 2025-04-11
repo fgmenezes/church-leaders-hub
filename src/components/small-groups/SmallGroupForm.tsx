@@ -121,74 +121,77 @@ export const SmallGroupForm = ({ smallGroup, onSuccess }: SmallGroupFormProps) =
   };
   
   // Enviar dados do formulário
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Create or update the small group
-    if (isEditing && smallGroup) {
-      // Certifique-se de que todos os campos requeridos do smallGroup sejam preservados
-      updateSmallGroup({
-        ...smallGroup,
-        nome: data.nome,
-        endereco: {
-          rua: data.endereco.rua,
-          numero: data.endereco.numero,
-          cep: data.endereco.cep,
-          bairro: data.endereco.bairro,
-          cidade: data.endereco.cidade,
-          estado: data.endereco.estado,
-        },
-        responsavel: {
-          nome: data.responsavel.nome,
-          telefone: data.responsavel.telefone,
-          email: data.responsavel.email,
-        },
-        frequencia: data.frequencia,
-        diaSemana: data.diaSemana,
-        horario: data.horario,
-        descricao: data.descricao,
-      });
-      
-      // Navigate back to the groups list after editing if no success callback
-      if (!onSuccess) {
-        navigate('/pequenos-grupos');
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      // Create or update the small group
+      if (isEditing && smallGroup) {
+        // Certifique-se de que todos os campos requeridos do smallGroup sejam preservados
+        await updateSmallGroup({
+          ...smallGroup,
+          nome: data.nome,
+          endereco: {
+            rua: data.endereco.rua,
+            numero: data.endereco.numero,
+            cep: data.endereco.cep,
+            bairro: data.endereco.bairro,
+            cidade: data.endereco.cidade,
+            estado: data.endereco.estado,
+          },
+          responsavel: {
+            nome: data.responsavel.nome,
+            telefone: data.responsavel.telefone,
+            email: data.responsavel.email,
+          },
+          frequencia: data.frequencia,
+          diaSemana: data.diaSemana,
+          horario: data.horario,
+          descricao: data.descricao,
+        });
+        
+        // Navigate back to the groups list after editing if no success callback
+        if (!onSuccess) {
+          navigate('/pequenos-grupos');
+        } else {
+          onSuccess();
+        }
+      } else {
+        // Criar um novo pequeno grupo com os campos obrigatórios
+        const novoGrupo: SmallGroup = {
+          id: `group_${Date.now()}`,
+          nome: data.nome,
+          endereco: {
+            rua: data.endereco.rua,
+            numero: data.endereco.numero,
+            cep: data.endereco.cep,
+            bairro: data.endereco.bairro,
+            cidade: data.endereco.cidade,
+            estado: data.endereco.estado,
+          },
+          responsavel: {
+            nome: data.responsavel.nome,
+            telefone: data.responsavel.telefone,
+            email: data.responsavel.email,
+          },
+          frequencia: data.frequencia,
+          diaSemana: data.diaSemana,
+          horario: data.horario,
+          descricao: data.descricao,
+          membros: [],
+          chamadas: []
+        };
+        
+        // Add the new group and handle navigation in the Promise
+        const createdGroup = await addSmallGroup(novoGrupo);
+        
+        // If no success callback is provided, navigate to the groups list
+        if (!onSuccess) {
+          navigate(`/pequenos-grupos/${createdGroup.id}`);
+        } else {
+          onSuccess();
+        }
       }
-    } else {
-      // Criar um novo pequeno grupo com os campos obrigatórios
-      const novoGrupo: SmallGroup = {
-        id: `group_${Date.now()}`,
-        nome: data.nome,
-        endereco: {
-          rua: data.endereco.rua,
-          numero: data.endereco.numero,
-          cep: data.endereco.cep,
-          bairro: data.endereco.bairro,
-          cidade: data.endereco.cidade,
-          estado: data.endereco.estado,
-        },
-        responsavel: {
-          nome: data.responsavel.nome,
-          telefone: data.responsavel.telefone,
-          email: data.responsavel.email,
-        },
-        frequencia: data.frequencia,
-        diaSemana: data.diaSemana,
-        horario: data.horario,
-        descricao: data.descricao,
-        membros: [],
-        chamadas: []
-      };
-      
-      // Add the new group and navigate
-      const createdGroup = addSmallGroup(novoGrupo);
-      
-      // If no success callback is provided, navigate to the groups list
-      if (!onSuccess) {
-        navigate(`/pequenos-grupos/${createdGroup.id}`);
-      }
-    }
-    
-    // Call the success callback if provided
-    if (onSuccess) {
-      onSuccess();
+    } catch (error) {
+      console.error('Erro ao salvar pequeno grupo:', error);
     }
   };
   
